@@ -5,6 +5,7 @@ import win32con
 from PIL import ImageGrab
 from ctypes import windll
 import win32gui
+import pytesseract
 import win32ui
 from PIL import Image
 
@@ -13,6 +14,15 @@ import wmi
 # Detect the window with Tetris game
 windows_list = []
 toplist = []
+# Players positions + status (0 - no player 1 - player in game)
+players_status_map = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+# Statuses: iresolve, fate, resources, melee, range, strategy
+players_stats_map = [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
+# board width
+map_width = 6
+# board height
+map_height = 6
+
 c = wmi.WMI()
 
 def enum_win(hwnd, result):
@@ -40,6 +50,9 @@ def main ():
         wait = cv2.waitKey(25)
         if wait == 27:
             break
+
+        text = pytesseract.image_to_string(screenshot)
+        print(text)
 # #        time.sleep(3)
 
 
