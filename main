@@ -1,0 +1,58 @@
+import cv2
+import numpy as np
+import win32api
+import win32con
+from PIL import ImageGrab
+from ctypes import windll
+import win32gui
+import win32ui
+from PIL import Image
+
+import time
+import wmi
+# Detect the window with Tetris game
+windows_list = []
+toplist = []
+c = wmi.WMI()
+
+def enum_win(hwnd, result):
+    win_text = win32gui.GetWindowText(hwnd)
+    windows_list.append((hwnd, win_text))
+
+def main ():
+
+    win32gui.EnumWindows(enum_win, toplist)
+    # Game handle
+    pid = 0
+    pid = win32gui.FindWindow(None, 'Talisman : The Horus Heresy')
+
+    while True:
+
+        position = win32gui.GetWindowRect(pid)
+
+        # Take screenshot
+        screenshot = ImageGrab.grab(position)
+        screenshot = np.array(screenshot)
+        screenshot = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)
+        #cv2.imwrite("in_memory_to_disk.png", screenshot)
+        cv2.imshow("Screen", screenshot)
+
+        wait = cv2.waitKey(25)
+        if wait == 27:
+            break
+# #        time.sleep(3)
+
+
+def scroll_back (pid):
+
+    win32api.SendMessage(pid,  win32con.MOUSE_WHEELED, (win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -1, 0)))
+    time.sleep(0.5)
+
+def press_space (pid):
+
+    win32api.SendMessage(pid, win32con.WM_KEYDOWN, win32con.VK_SPACE)
+    time.sleep(0.5)
+    win32api.SendMessage(pid, win32con.WM_KEYUP, win32con.VK_SPACE)
+
+main()
+
