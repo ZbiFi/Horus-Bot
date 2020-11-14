@@ -20,24 +20,38 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2dffa4bd-8168-4fe5-b855-2716c31d8d4c" name="Default Changelist" comment="Commit">
-      <change afterPath="$PROJECT_DIR$/ssmanipulations/Angron.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ssmanipulations/dice.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ssmanipulations/map_0" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ssmanipulations/stat.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ssmanipulations/temp.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/6_blue.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/6_red.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/dice_0.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/dice_1.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/dice_2.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/dice_3.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/dice_4.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/dice_5.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/dice_6.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/empty.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/role_dice.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/10_blue.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/10_red.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/11_blue.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/11_red.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/12_blue.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/12_red.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/13_blue.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/13_red.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/14_blue.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/14_red.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/15_blue.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/15_red.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/16_blue.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/16_red.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/17_blue.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/17_red.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/18_blue.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/18_red.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/19_blue.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/19_red.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/20_blue.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/20_red.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/21_red.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/7_blue.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/7_red.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/8_blue.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/8_red.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/9_blue.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/9_red.jpg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssmanipulations/dice.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/ssmanipulations/dice.jpg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ssmanipulations/screenshot.bmp" beforeDir="false" afterPath="$PROJECT_DIR$/ssmanipulations/screenshot.bmp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ssmanipulations/temp_stat.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/ssmanipulations/temp_stat.jpg" afterDir="false" />
     </list>
@@ -161,7 +175,14 @@
       <option name="project" value="LOCAL" />
       <updated>1605348707192</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Commit">
+      <created>1605357970494</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1605357970494</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -207,22 +228,22 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="299" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1605287421739" />
-    <state width="1899" height="282" key="GridCell.Tab.0.bottom" timestamp="1605357490680">
+    <state width="1899" height="282" key="GridCell.Tab.0.bottom" timestamp="1605385018223">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1605357490680" />
-    <state width="1899" height="282" key="GridCell.Tab.0.center" timestamp="1605357490680">
+    <state width="1899" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1605385018223" />
+    <state width="1899" height="282" key="GridCell.Tab.0.center" timestamp="1605385018223">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="282" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1605357490680" />
-    <state width="1899" height="282" key="GridCell.Tab.0.left" timestamp="1605357490680">
+    <state width="1899" height="282" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1605385018223" />
+    <state width="1899" height="282" key="GridCell.Tab.0.left" timestamp="1605385018223">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="282" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1605357490680" />
-    <state width="1899" height="282" key="GridCell.Tab.0.right" timestamp="1605357490680">
+    <state width="1899" height="282" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1605385018223" />
+    <state width="1899" height="282" key="GridCell.Tab.0.right" timestamp="1605385018223">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="282" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1605357490680" />
+    <state width="1899" height="282" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1605385018223" />
     <state x="184" y="86" key="MergeDialog" timestamp="1605348682450">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -235,10 +256,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1605287434530" />
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1605348710512">
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1605357974533">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1605348710512" />
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1605357974533" />
     <state x="92" y="92" width="1736" height="856" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1605352372972">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

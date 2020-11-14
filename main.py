@@ -24,6 +24,11 @@ map_1_field_count = 16
 map_2_field_count = 8
 map_3_field_count = 1
 
+map_0 = ['Isstvann V', 'The Halo Starts', 'Caliban', 'The Rubicon Straits', 'Port Maw', 'The Ghoul Stars', 'Signus Prime', 'The Death of Reason', 'The Maelstorm', 'The Eastern Fringe', 'Tigrus', 'The Thirteen Realms', 'Macragge', 'Calth', 'Deliverance', 'The Charadon Sector', 'Prospero', 'The Golgothan Wastes', 'Nikaea', 'The Veiled Region', 'The Phall System', 'The Intergalactic Void', 'Lucius', 'The Isstvan Asteroid Range']
+map_1 = ['Isstvann III', 'Warp Storm', 'Eye of Terror', 'Warp Storm', 'Davin', 'The Dominion of Storms', 'Paramar', 'The Kayvas Belt', 'Tallarn', 'The Uhulis Sector', 'Luna', 'Cthonia', 'Titan', 'The Mandragoran Sector', 'Mars', 'The Stellar Wastes']
+map_2 = ['The Outer Palace', 'The Inner Palace', 'The Outer Palace', 'Damocles Startport', 'Arcus Orbital Plate', 'Spaceport Primus', 'Lemurya Orbital Plate', 'The Wastes']
+map_3 = ['The Final Battle']
+
 pytesseract.pytesseract.tesseract_cmd = "C:\\Program Files (x86)\\Tesseract-OCR\\tesseract.exe"
 # Players positions (mapId, fieldId, status (0 - no player 1 - player in game)
 players_status_map = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
@@ -138,8 +143,8 @@ def check_stats(stat,row_2,column_2):
 
 def compare (filename,mode):
 
-    stat_list = ['0_blue', '1_blue', '2_blue', '3_blue', '4_blue', '5_blue', '0_red', '1_red', '2_red', '3_red', '4_red', '5_red']
-    stat_value_list = [0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5]
+    stat_list = ['0_blue', '1_blue', '2_blue', '3_blue', '4_blue', '5_blue', '6_blue', '7_blue', '8_blue', '9_blue', '10_blue', '11_blue', '12_blue', '13_blue', '14_blue', '15_blue', '16_blue', '17_blue', '18_blue', '19_blue', '20_blue', '0_red', '1_red', '2_red', '3_red', '4_red', '5_red', '6_red', '7_red', '8_red', '9_red', '10_red', '11_red', '12_red', '13_red', '14_red', '15_red', '16_red', '17_red', '18_red', '19_red', '20_red']
+    stat_value_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     ui_list = ['empty', 'role_dice']
     ui_value_list = [0, 1]
     dice_list = ['dice_0', 'dice_1', 'dice_2', 'dice_3', 'dice_4', 'dice_5', 'dice_6']
@@ -232,7 +237,8 @@ def load_player_stats(status):
 #check_stats()
 #compare()
 #check_fragment(1730,300,1880,340, 'temp')
-#check_stats(0,1,1)
+#check_stats(3,1,0)
+
 #check_fragment(510, 80, 580, 150, 'dice')
 
 #check_fragment(1750,650,1820,720, 'stat')
