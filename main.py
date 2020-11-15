@@ -1,10 +1,17 @@
+import binascii
+import ctypes
 import random
+from _ctypes import POINTER
+from ctypes.wintypes import DWORD, BOOL, HANDLE, LPVOID
+from sys import getsizeof
 
+from ReadWriteMemory import ReadWriteMemory
 import cv2
 import imutils as imutils
 import numpy as np
 import win32api
 import win32con
+import win32process
 from PIL import ImageGrab
 from ctypes import windll
 import win32gui
@@ -17,6 +24,8 @@ import time
 import wmi
 
 # Detect the window with Tetris game
+from win32process import ReadProcessMemory
+
 windows_list = []
 toplist = []
 map_0_field_count = 24
@@ -239,6 +248,7 @@ def load_player_stats(status):
 #check_fragment(1730,300,1880,340, 'temp')
 #check_stats(3,1,0)
 
+#check_fragment(475,108,615,130, 'player')
 #check_fragment(510, 80, 580, 150, 'dice')
 
 #check_fragment(1750,650,1820,720, 'stat')
@@ -250,3 +260,80 @@ def load_player_stats(status):
 
 #alt right dice
 #check_fragment(1355, 80, 1425, 150, 'dice')
+#
+# img_rgb = cv2.imread('ssmanipulations/dupa.jpg')
+# img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
+# template = cv2.imread('ssmanipulations/player.jpg',0)
+# marker = cv2.imread('ssmanipulations/location_marker.jpg',0)
+# w, h = template.shape[::-1]
+# mar_w, mar_h = marker.shape[::-1]
+# res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED)
+# mar_res = cv2.matchTemplate(img_gray,marker,cv2.TM_CCOEFF_NORMED)
+# threshold = 0.8
+# mar_threshold = 0.95
+# loc = np.where( res >= threshold)
+# mar_lock = np.where( mar_res >= mar_threshold)
+# print(mar_lock)
+# for pt in zip(*mar_lock[::-1]):
+#     cv2.rectangle(img_rgb, ((251+mar_w, 295)), (pt[0], pt[1] + mar_h), (0,0,255), 1)
+#
+# cv2.imshow('output', img_rgb)
+#
+# # The image is only displayed if we call this
+# cv2.waitKey(0)
+
+pid = 9696
+address = '7FDF70'
+address2 = 0x00000000007FDF70
+#true_adrress = 'C1DF70'
+base_address = 0x420000
+true_address2 = 0x0000000000420000
+address3 = 0x0000000000C1DF70
+buffer = 100
+buffer2 = 100
+
+mega_address = base_address + 0x7FDF70
+
+# #
+# PROCESS_ALL_ACCESS = 0x1F0FFF
+# processHandle = win32api.OpenProcess(PROCESS_ALL_ACCESS, False, 9696)
+# modules = win32process.EnumProcessModules(processHandle)
+# processHandle.close()
+# base_addr = modules[0]
+# print (hex(base_addr))
+#
+# def read_process_memory(process_id, address, offsets, size_of_data=4):
+#
+#     p_handle = ctypes.windll.kernel32.OpenProcess(win32con.PROCESS_VM_READ, False, process_id)
+#
+#     data = ctypes.c_uint(size_of_data)
+#     bytesRead = ctypes.c_uint(size_of_data)
+#
+#
+#     current_address = ctypes.c_void_p(address)
+#
+#     if offsets:
+#         # Do something to the offsets
+#         ctypes.windll.kernel32.ReadProcessMemory(p_handle, current_address, ctypes.byref(data), ctypes.sizeof(data), ctypes.byref(bytesRead))
+#
+#     else:
+#         ctypes.windll.kernel32.ReadProcessMemory(p_handle, current_address, ctypes.byref(data), ctypes.sizeof(data), ctypes.byref(bytesRead))
+#
+#
+#     return data.value
+#
+# result = (read_process_memory(9696, 0x420000, 0x7FDF70))
+# print(result)
+# result2 = result.to_bytes(8,'little')
+# print(result2)
+
+rwm = ReadWriteMemory()
+
+process = rwm.get_process_by_name('Horus.exe')
+process.open()
+
+health_pointer = process.get_pointer(0x420000, offsets=[])
+
+health = process.read(health_pointer)
+
+print(health)
