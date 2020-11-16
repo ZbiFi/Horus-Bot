@@ -11,7 +11,7 @@ import win32gui
 from win32gui import GetWindowRect
 import win32ui
 import pytesseract
-from PIL import Image
+from PIL import Image, ImageDraw
 from skimage.measure import compare_ssim
 import time
 import wmi
@@ -254,20 +254,35 @@ def load_player_stats(status):
 #alt right dice
 #check_fragment(1355, 80, 1425, 150, 'dice')
 #
+
 img_rgb = cv2.imread('ssmanipulations/screenshot.bmp')
 img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
-template = cv2.imread('ssmanipulations/podstawa2.png',0)
+template = cv2.imread('ssmanipulations/podst.png',0)
 w, h = template.shape[::-1]
 
-res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED)
-threshold = 0.70
+
+res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED )
+threshold = 0.7
 loc = np.where( res >= threshold)
 for pt in zip(*loc[::-1]):
     cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0,0,255), 2)
 
+
 cv2.imshow('output', img_rgb)
 
 wait = cv2.waitKey(0)
+
+
+
+
+
+
+
+
+
+
+
+
 pid = 2736
 current_player_offset = '7FDF70'
 user_offset = '7D28D0'
