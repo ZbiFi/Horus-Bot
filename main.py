@@ -5,6 +5,8 @@ from _ctypes import POINTER
 from ctypes.wintypes import DWORD, BOOL, HANDLE, LPVOID
 from sys import getsizeof
 
+import psutil as psutil
+import pymem as pymem
 from ReadWriteMemory import ReadWriteMemory
 import cv2
 import imutils as imutils
@@ -282,58 +284,103 @@ def load_player_stats(status):
 # # The image is only displayed if we call this
 # cv2.waitKey(0)
 
-pid = 9696
-address = '7FDF70'
-address2 = 0x00000000007FDF70
-#true_adrress = 'C1DF70'
-base_address = 0x420000
-true_address2 = 0x0000000000420000
-address3 = 0x0000000000C1DF70
-buffer = 100
-buffer2 = 100
+pid = 2964
+current_player_offset = '7FDF70'
+user_offset = '7D28D0'
 
-mega_address = base_address + 0x7FDF70
+# # #
+PROCESS_ALL_ACCESS = 0x1F0FFF
+processHandle = win32api.OpenProcess(PROCESS_ALL_ACCESS, False, pid)
+modules = win32process.EnumProcessModules(processHandle)
+processHandle.close()
+#print (modules)
+#print (len(modules))
+base_addr = modules[0]
+#print (base_addr)
+#print (hex(base_addr))
 
-# #
-# PROCESS_ALL_ACCESS = 0x1F0FFF
-# processHandle = win32api.OpenProcess(PROCESS_ALL_ACCESS, False, 9696)
-# modules = win32process.EnumProcessModules(processHandle)
-# processHandle.close()
-# base_addr = modules[0]
-# print (hex(base_addr))
-#
-# def read_process_memory(process_id, address, offsets, size_of_data=4):
-#
-#     p_handle = ctypes.windll.kernel32.OpenProcess(win32con.PROCESS_VM_READ, False, process_id)
-#
-#     data = ctypes.c_uint(size_of_data)
-#     bytesRead = ctypes.c_uint(size_of_data)
-#
-#
-#     current_address = ctypes.c_void_p(address)
-#
-#     if offsets:
-#         # Do something to the offsets
-#         ctypes.windll.kernel32.ReadProcessMemory(p_handle, current_address, ctypes.byref(data), ctypes.sizeof(data), ctypes.byref(bytesRead))
-#
-#     else:
-#         ctypes.windll.kernel32.ReadProcessMemory(p_handle, current_address, ctypes.byref(data), ctypes.sizeof(data), ctypes.byref(bytesRead))
-#
-#
-#     return data.value
-#
-# result = (read_process_memory(9696, 0x420000, 0x7FDF70))
-# print(result)
-# result2 = result.to_bytes(8,'little')
-# print(result2)
 
-rwm = ReadWriteMemory()
 
-process = rwm.get_process_by_name('Horus.exe')
-process.open()
 
-health_pointer = process.get_pointer(0x420000, offsets=[])
 
-health = process.read(health_pointer)
+def read_process_memory(process_id, address, offsets, size_of_data=8):
 
-print(health)
+    p_handle = ctypes.windll.kernel32.OpenProcess(win32con.PROCESS_VM_READ, False, process_id)
+
+    data = ctypes.c_uint(size_of_data)
+    bytesRead = ctypes.c_uint(size_of_data)
+
+    current_address = ctypes.c_void_p(address+offsets)
+    if offsets:
+        # Do something to the offsets
+        ctypes.windll.kernel32.ReadProcessMemory(p_handle, current_address, ctypes.byref(data), ctypes.sizeof(data), ctypes.byref(bytesRead))
+
+    else:
+        ctypes.windll.kernel32.ReadProcessMemory(p_handle, current_address, ctypes.byref(data), ctypes.sizeof(data), ctypes.byref(bytesRead))
+
+
+    return data.value
+
+
+
+#
+# adress1 = base_addr
+#
+# for module in modules:
+#     if module == 83755008:
+#         print ('tu')
+#
+#     adress2 = module + int('7D28D0', 16)
+#     print (adress2)
+#
+#
+#
+#     result = (read_process_memory(2964, adress2, False))
+#     print(result)
+#     result2 = result.to_bytes(4, 'little')
+#     print(result2)
+#
+
+adress2 = 83755008 + int('7FDF70', 16)
+#print(adress2)
+war = True
+current_player = ''
+temp_offset = 0
+while war:
+    result = (read_process_memory(pid, adress2, temp_offset, False))
+    #print(result)
+    result2 = result.to_bytes(4, 'little')
+    print(result2)
+    current_player = current_player + result2.decode("utf-8")[::3]
+    if result2[2] == 0 and result2[3] == 0:
+        print ("wystarczy")
+        war = False
+    temp_offset += 1
+
+print (current_player)
+#print(result2.decode("utf-8"))
+
+
+# def check_in_memory_for_user_data_and_get_true_base_memory (fourLetters, p_pid):
+#
+#     PROCESS_ALL_ACCESS = 0x1F0FFF
+#     processHandle = win32api.OpenProcess(PROCESS_ALL_ACCESS, False, p_pid)
+#     modules = win32process.EnumProcessModules(processHandle)
+#     processHandle.close()
+#
+#     for module in modules:
+#
+#         adress2 = module + int('7D28D0', 16)
+#         result = (read_process_memory(p_pid, adress2, False))
+#         result2 = result.to_bytes(4, 'little')
+#         print(result2)
+#         try:
+#             check = result2.decode("utf-8")
+#         except UnicodeDecodeError:
+#             #print(result2)
+#             continue
+#
+#         if check == fourLetters:
+#             return module
+#
+# true_base_memory = (check_in_memory_for_user_data_and_get_true_base_memory ('Kamo',2964))
