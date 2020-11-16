@@ -1,21 +1,12 @@
-import binascii
-import ctypes
-import random
-from _ctypes import POINTER
-from ctypes.wintypes import DWORD, BOOL, HANDLE, LPVOID
-from sys import getsizeof
 
-import psutil as psutil
-import pymem as pymem
-from ReadWriteMemory import ReadWriteMemory
+import ctypes
+
 import cv2
-import imutils as imutils
-import numpy as np
+
 import win32api
 import win32con
 import win32process
-from PIL import ImageGrab
-from ctypes import windll
+
 import win32gui
 from win32gui import GetWindowRect
 import win32ui
@@ -284,22 +275,22 @@ def load_player_stats(status):
 # # The image is only displayed if we call this
 # cv2.waitKey(0)
 
-pid = 2964
+pid = 2736
 current_player_offset = '7FDF70'
 user_offset = '7D28D0'
 
 # # #
-PROCESS_ALL_ACCESS = 0x1F0FFF
-processHandle = win32api.OpenProcess(PROCESS_ALL_ACCESS, False, pid)
-modules = win32process.EnumProcessModules(processHandle)
-processHandle.close()
-#print (modules)
-#print (len(modules))
-base_addr = modules[0]
-#print (base_addr)
-#print (hex(base_addr))
-
-
+# PROCESS_ALL_ACCESS = 0x1F0FFF
+# processHandle = win32api.OpenProcess(PROCESS_ALL_ACCESS, False, pid)
+# modules = win32process.EnumProcessModules(processHandle)
+# processHandle.close()
+# print (modules)
+# print (len(modules))
+# base_addr = modules[0]
+# print (base_addr)
+# print (hex(base_addr))
+#
+#
 
 
 
@@ -310,7 +301,7 @@ def read_process_memory(process_id, address, offsets, size_of_data=8):
     data = ctypes.c_uint(size_of_data)
     bytesRead = ctypes.c_uint(size_of_data)
 
-    current_address = ctypes.c_void_p(address+offsets)
+    current_address = ctypes.c_void_p(address + offsets)
     if offsets:
         # Do something to the offsets
         ctypes.windll.kernel32.ReadProcessMemory(p_handle, current_address, ctypes.byref(data), ctypes.sizeof(data), ctypes.byref(bytesRead))
@@ -325,7 +316,7 @@ def read_process_memory(process_id, address, offsets, size_of_data=8):
 
 #
 # adress1 = base_addr
-#
+
 # for module in modules:
 #     if module == 83755008:
 #         print ('tu')
@@ -341,46 +332,76 @@ def read_process_memory(process_id, address, offsets, size_of_data=8):
 #     print(result2)
 #
 
-adress2 = 83755008 + int('7FDF70', 16)
-#print(adress2)
-war = True
-current_player = ''
-temp_offset = 0
-while war:
-    result = (read_process_memory(pid, adress2, temp_offset, False))
-    #print(result)
-    result2 = result.to_bytes(4, 'little')
-    print(result2)
-    current_player = current_player + result2.decode("utf-8")[::3]
-    if result2[2] == 0 and result2[3] == 0:
-        print ("wystarczy")
-        war = False
-    temp_offset += 1
+# adress2 = 1720975360 + int('7FDF70', 16)
+# #print(adress2)
+# war = True
+# current_player = ''
+# temp_offset = 0
+# while war:
+#     result = (read_process_memory(pid, adress2, temp_offset, False))
+#     #print(result)
+#     result2 = result.to_bytes(4, 'little')
+#     #print(result2)
+#     if (current_player) == '':
+#         current_player = result2.decode("utf-8")
+#     else:
+#         current_player = current_player + result2.decode("utf-8")[-1]
+#     if result2[2] == 0 and result2[3] == 0:
+#         #print ("wystarczy")
+#         current_player = current_player.strip()
+#         war = False
+#     temp_offset += 1
+#
+#     #print (current_player)
 
-print (current_player)
-#print(result2.decode("utf-8"))
+def get_turn_current_player (base_adress, p_pid):
+
+    base_adress_2 = base_adress+ int('7FDF70', 16)
+    war = True
+    current_player = ''
+    temp_offset = 0
+    while war:
+        result = (read_process_memory(p_pid, base_adress_2, temp_offset, False))
+        # print(result)
+        result2 = result.to_bytes(4, 'little')
+        # print(result2)
+        if (current_player) == '':
+            current_player = result2.decode("utf-8")
+        else:
+            current_player = current_player + result2.decode("utf-8")[-1]
+        if result2[2] == 0 and result2[3] == 0:
+            # print ("wystarczy")
+            current_player = current_player.strip()
+            war = False
+        temp_offset += 1
+
+    return current_player
+
+def check_in_memory_for_user_data_and_get_true_base_memory (fourLetters, p_pid):
+
+    PROCESS_ALL_ACCESS = 0x1F0FFF
+    processHandle = win32api.OpenProcess(PROCESS_ALL_ACCESS, False, p_pid)
+    modules = win32process.EnumProcessModules(processHandle)
+    processHandle.close()
+    #print(modules)
+
+    for module in modules:
+        adress2 = module + int('7D28D0', 16)
+        result = (read_process_memory(p_pid, adress2, 0, False))
+        result2 = result.to_bytes(4, 'little')
+        #print(result2)
+        try:
+            check = result2.decode("utf-8")
+        except UnicodeDecodeError:
+            #print(result2)
+            continue
+
+        if check == fourLetters:
+            return module
 
 
-# def check_in_memory_for_user_data_and_get_true_base_memory (fourLetters, p_pid):
-#
-#     PROCESS_ALL_ACCESS = 0x1F0FFF
-#     processHandle = win32api.OpenProcess(PROCESS_ALL_ACCESS, False, p_pid)
-#     modules = win32process.EnumProcessModules(processHandle)
-#     processHandle.close()
-#
-#     for module in modules:
-#
-#         adress2 = module + int('7D28D0', 16)
-#         result = (read_process_memory(p_pid, adress2, False))
-#         result2 = result.to_bytes(4, 'little')
-#         print(result2)
-#         try:
-#             check = result2.decode("utf-8")
-#         except UnicodeDecodeError:
-#             #print(result2)
-#             continue
-#
-#         if check == fourLetters:
-#             return module
-#
-# true_base_memory = (check_in_memory_for_user_data_and_get_true_base_memory ('Kamo',2964))
+true_base_memory = (check_in_memory_for_user_data_and_get_true_base_memory ('Kamo', 2736))
+
+print(true_base_memory)
+
+print(get_turn_current_player(true_base_memory, 2736))
