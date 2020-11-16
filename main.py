@@ -6,7 +6,7 @@ import cv2
 import win32api
 import win32con
 import win32process
-
+import numpy as np
 import win32gui
 from win32gui import GetWindowRect
 import win32ui
@@ -254,27 +254,20 @@ def load_player_stats(status):
 #alt right dice
 #check_fragment(1355, 80, 1425, 150, 'dice')
 #
-# img_rgb = cv2.imread('ssmanipulations/dupa.jpg')
-# img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
-# template = cv2.imread('ssmanipulations/player.jpg',0)
-# marker = cv2.imread('ssmanipulations/location_marker.jpg',0)
-# w, h = template.shape[::-1]
-# mar_w, mar_h = marker.shape[::-1]
-# res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED)
-# mar_res = cv2.matchTemplate(img_gray,marker,cv2.TM_CCOEFF_NORMED)
-# threshold = 0.8
-# mar_threshold = 0.95
-# loc = np.where( res >= threshold)
-# mar_lock = np.where( mar_res >= mar_threshold)
-# print(mar_lock)
-# for pt in zip(*mar_lock[::-1]):
-#     cv2.rectangle(img_rgb, ((251+mar_w, 295)), (pt[0], pt[1] + mar_h), (0,0,255), 1)
-#
-# cv2.imshow('output', img_rgb)
-#
-# # The image is only displayed if we call this
-# cv2.waitKey(0)
+img_rgb = cv2.imread('ssmanipulations/screenshot.bmp')
+img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
+template = cv2.imread('ssmanipulations/podstawa2.png',0)
+w, h = template.shape[::-1]
 
+res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED)
+threshold = 0.70
+loc = np.where( res >= threshold)
+for pt in zip(*loc[::-1]):
+    cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0,0,255), 2)
+
+cv2.imshow('output', img_rgb)
+
+wait = cv2.waitKey(0)
 pid = 2736
 current_player_offset = '7FDF70'
 user_offset = '7D28D0'
@@ -356,6 +349,7 @@ def read_process_memory(process_id, address, offsets, size_of_data=8):
 
 def get_turn_current_player (base_adress, p_pid):
 
+    #7FDF70 -> offset for currently selected player
     base_adress_2 = base_adress+ int('7FDF70', 16)
     war = True
     current_player = ''
@@ -400,8 +394,8 @@ def check_in_memory_for_user_data_and_get_true_base_memory (fourLetters, p_pid):
             return module
 
 
-true_base_memory = (check_in_memory_for_user_data_and_get_true_base_memory ('Kamo', 2736))
-
-print(true_base_memory)
-
-print(get_turn_current_player(true_base_memory, 2736))
+# true_base_memory = (check_in_memory_for_user_data_and_get_true_base_memory ('Kamo', 2736))
+#
+# print(true_base_memory)
+#
+# print(get_turn_current_player(true_base_memory, 2736))
