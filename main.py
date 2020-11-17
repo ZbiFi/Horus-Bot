@@ -9,6 +9,7 @@ import win32process
 import numpy as np
 import win32gui
 from scipy import spatial
+from skimage import metrics
 from win32gui import GetWindowRect
 import win32ui
 import pytesseract
@@ -30,6 +31,8 @@ map_3_field_count = 1
 map_0 = ['Isstvann V', 'The Halo Starts', 'Caliban', 'The Rubicon Straits', 'Port Maw', 'The Ghoul Stars', 'Signus Prime', 'The Death of Reason', 'The Maelstorm', 'The Eastern Fringe', 'Tigrus', 'The Thirteen Realms', 'Macragge', 'Calth', 'Deliverance', 'The Charadon Sector', 'Prospero', 'The Golgothan Wastes', 'Nikaea', 'The Veiled Region', 'The Phall System', 'The Intergalactic Void', 'Lucius', 'The Isstvan Asteroid Range']
 #cords [x1;y1;x2;y2]
 map_0_cords = [[523 , 130, 652, 181],[653 , 130, 772, 181],[773 , 130, 899, 181],[900 , 130, 1019, 181],[1020 , 130, 1139, 181],[1140 , 130, 1262, 181],[1263 , 130, 1407, 181],[1302, 182, 1433, 238],[1317, 239, 1462, 301],[1338 , 302, 1495, 371],[1362, 372, 1534, 454],[1392, 455, 1573,548],[1428, 549, 1660, 661],[1233, 549, 1402, 661],[1050, 549, 1232, 661],[875, 549, 1049, 661],[695, 549, 863, 661],[517, 549, 673, 661],[324, 549, 492, 661],[360, 455, 526,548],[398, 372, 561, 454],[435, 302, 590, 371],[466, 239, 611, 301],[500 , 182, 626, 238]]
+map_0_if_top = ['The Halo Starts', 'Caliban', 'The Rubicon Straits', 'Port Maw']
+map_0_cords_if_top =[[334, 273, 540, 396],[584, 273, 818, 396],[883, 273, 1080, 396],[1090, 273, 1377, 396]]
 map_1 = ['Isstvann III', 'Warp Storm', 'Eye of Terror', 'Warp Storm', 'Davin', 'The Dominion of Storms', 'Paramar', 'The Kayvas Belt', 'Tallarn', 'The Uhulis Sector', 'Luna', 'Cthonia', 'Titan', 'The Mandragoran Sector', 'Mars', 'The Stellar Wastes']
 map_1_cords = [[650 , 182, 767, 238],[775 , 182, 895, 238],[900 , 182, 1024, 238],[1025, 182, 1157, 238],[1158, 182, 1301, 238],[1168, 239, 1300, 301],[1182 , 302, 1319, 371],[1194, 372, 1341, 455],[1210, 455, 1373,548],[1040, 455, 1209,548],[884, 455, 1050,548],[725, 455, 874,548],[565, 455, 711,548],[592, 372, 732, 455],[609 , 302, 746, 371],[628, 239, 758, 301]]
 map_2 = ['The Outer Palace', 'The Inner Palace', 'The Outer Palace', 'Damocles Startport', 'Arcus Orbital Plate', 'Spaceport Primus', 'Lemurya Orbital Plate', 'The Wastes']
@@ -47,7 +50,12 @@ map_width = 7
 # board height
 map_height = 7
 
+game_pid = 18256
+steam_name_4_lett = "Kamo"
+true_base_memory = 0
+player_character = 'Roboute Guilliman'
 c = wmi.WMI()
+search_mode = 0
 
 def enum_win(hwnd, result):
     win_text = win32gui.GetWindowText(hwnd)
@@ -56,8 +64,11 @@ def enum_win(hwnd, result):
 def main ():
 
     global players_stats_map_status
+    global true_base_memory
+    global search_mode
     offsetx = 0
     offsety = 0
+    found_player = 0
     win_width = 0
     win_height = 0
     player_turn = 0
@@ -66,11 +77,33 @@ def main ():
     pid = 0
     pid = win32gui.FindWindow(None, 'Talisman : The Horus Heresy')
 
+    true_base_memory = check_in_memory_for_user_data_and_get_true_base_memory(steam_name_4_lett, game_pid)
+    #print(true_base_memory)
+
     while True:
 
+        #print(get_turn_current_player(true_base_memory, game_pid))
         position = win32gui.GetWindowRect(pid)
         offsetx, offsety, win_width, win_height = GetWindowRect(pid)
         background_screenshot(pid, win_width - offsetx, win_height - offsety)
+
+        scroll_back(game_pid,1)
+
+        if found_player == 0:
+            print("Before Search_mode" + str(search_mode) + " Player found" + str(found_player))
+            found_player = looking(2, search_mode)
+
+            print("Search_mode" + str(search_mode) + " Player found" + str(found_player))
+
+            if found_player == 0:
+                click_on_not_found_location(game_pid)
+                scroll_forward(game_pid)
+                #print("Scrolled forward")
+
+            if found_player == 1:
+                scroll_back(game_pid,0)
+
+
 
         #load player stats
         if players_stats_map_status == 0:
@@ -80,11 +113,12 @@ def main ():
         #check_if_roll_needed
         #if (if_waiting_for_roll()):
         #    press_space(pid)
-        check_fragment(1750, 650, 1820, 720, 'dice')
-        filename = 'ssmanipulations/' + 'dice' + '.jpg'
+
+        #check_fragment(1750, 650, 1820, 720, 'dice')
+        #filename = 'ssmanipulations/' + 'dice' + '.jpg'
         #print ("Dice:" + str(compare(filename,2)))
         #looking(1)
-        wait = cv2.waitKey(100)
+        wait = cv2.waitKey(10)
         if wait == 27:
             break
 
@@ -102,18 +136,39 @@ def background_screenshot(hwnd, width, height):
 
 
     img = cv2.imread('ssmanipulations/screenshot.bmp', cv2.COLOR_BGR2GRAY)
-    #looking(1)
-    cv2.imshow("Screen", img)
+    #cv2.imshow("Screen", img)
     dcObj.DeleteDC()
     cDC.DeleteDC()
     win32gui.ReleaseDC(hwnd, wDC)
     win32gui.DeleteObject(dataBitMap.GetHandle())
 
+def click_on_not_found_location (pid):
 
-def scroll_back (pid):
+    x = 946
+    y = 140
+    win32api.SetCursorPos((x, y))
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+    time.sleep(1)
 
+
+def scroll_back (pid, inicial):
+
+    global search_mode
     win32api.SendMessage(pid,  win32con.MOUSE_WHEELED, (win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -1, 0)))
-    time.sleep(0.5)
+    time.sleep(1)
+    win32api.SendMessage(pid, win32con.MOUSE_WHEELED, (win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -1, 0)))
+    time.sleep(1)
+    if inicial != 1:
+        search_mode = 0
+    time.sleep(1)
+
+def scroll_forward (pid):
+
+    global search_mode
+    win32api.SendMessage(pid,  win32con.MOUSE_WHEELED, (win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, 1, 0)))
+    search_mode = 1
+    time.sleep(1)
 
 def press_space (pid):
 
@@ -177,8 +232,8 @@ def compare (filename,mode):
         grayA = cv2.cvtColor(imageA, cv2.COLOR_BGR2GRAY)
         grayB = cv2.cvtColor(imageB, cv2.COLOR_BGR2GRAY)
 
-        (score, diff) = compare_ssim(grayA, grayB, full=True)
-        diff = (diff * 255).astype("uint8")
+        (score, diff) = metrics.structural_similarity(grayA, grayB, full=True)
+        #diff = (diff * 255).astype("uint8")
         if score > best_number:
             best_number = score
             best_hit = i
@@ -264,91 +319,121 @@ def load_player_stats(status):
 # (507, 111) (654, 162)
 
 
-def check_if_in_area(x,y):
+def check_if_in_area(x,y,mode2):
 
-    for i in range(len(map_0_cords)):
-        if x <map_0_cords[i][2] and x >map_0_cords[i][0] and y<map_0_cords[i][3] and y>map_0_cords[i][1]:
-            return (map_0[i])
-    for i in range(len(map_1_cords)):
-        if x <map_1_cords[i][2] and x >map_1_cords[i][0] and y<map_1_cords[i][3] and y>map_1_cords[i][1]:
-            return (map_1[i])
-    for i in range(len(map_2_cords)):
-        if x <map_2_cords[i][2] and x >map_2_cords[i][0] and y<map_2_cords[i][3] and y>map_2_cords[i][1]:
-            return (map_2[i])
-    for i in range(len(map_3_cords)):
-        if x <map_3_cords[i][2] and x >map_3_cords[i][0] and y<map_3_cords[i][3] and y>map_3_cords[i][1]:
-            return (map_3[i])
+    if mode2 ==0:
+        for i in range(len(map_0_cords)):
+            if x <map_0_cords[i][2] and x >map_0_cords[i][0] and y<map_0_cords[i][3] and y>map_0_cords[i][1]:
+                return (map_0[i],i)
+        for i in range(len(map_1_cords)):
+            if x <map_1_cords[i][2] and x >map_1_cords[i][0] and y<map_1_cords[i][3] and y>map_1_cords[i][1]:
+                return (map_1[i],i)
+        for i in range(len(map_2_cords)):
+            if x <map_2_cords[i][2] and x >map_2_cords[i][0] and y<map_2_cords[i][3] and y>map_2_cords[i][1]:
+                return (map_2[i],i)
+        for i in range(len(map_3_cords)):
+            if x <map_3_cords[i][2] and x >map_3_cords[i][0] and y<map_3_cords[i][3] and y>map_3_cords[i][1]:
+                return (map_3[i],i)
+    if mode2 ==1:
+        for i in range(len(map_0_cords_if_top)):
+            if x <map_0_cords_if_top[i][2] and x >map_0_cords_if_top[i][0] and y<map_0_cords_if_top[i][3] and y>map_0_cords_if_top[i][1]:
+                return (map_0_if_top[i],i)
 
-    return 0
+    return 0,0
 
-def looking(mode):
+def looking(mode, mode2):
+
+    #mode: 1 - signle search 2 - all higher then threshold
+    #mode2: 0 - normal 1 -top
+    #img_rgb = cv2.imread('ssmanipulations/screenshot.bmp')
     img_rgb = cv2.imread('ssmanipulations/screenshot.bmp')
     img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
-    template = cv2.imread('ssmanipulations/rob.png',0)
+    template = cv2.imread('ssmanipulations/wholeback.png',0)
     w, h = template.shape[::-1]
 
 
 
     if mode == 1:
-        res = cv2.matchTemplate(img_gray,template,cv2.TM_SQDIFF_NORMED )
+        res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED )
 
+        #threshold = 0.75
+        threshold = 0.5
+        #print (res)
 
-        # We want the minimum squared difference
-        mn, _, mnLoc, _ = cv2.minMaxLoc(res)
+        if (np.max(res) > threshold):
+            # We want the minimum squared difference
+            mn, _, mnLoc, _ = cv2.minMaxLoc(res)
 
-        # Draw the rectangle:
-        # Extract the coordinates of our best match
-        MPx, MPy = mnLoc
+            # Draw the rectangle:
+            # Extract the coordinates of our best match
+            MPx, MPy = mnLoc
 
-        # Step 2: Get the size of the template. This is the same size as the match.
-        trows, tcols = template.shape[:2]
+            # Step 2: Get the size of the template. This is the same size as the match.
+            trows, tcols = template.shape[:2]
 
-        #show all fields
-        # for i in range(len(map_0_cords)):
-        #     cv2.rectangle(img_rgb, (map_0_cords[i][0], map_0_cords[i][1]), (map_0_cords[i][2], map_0_cords[i][3]), (0, 0, 255), 1)
-        #
-        # for i in range(len(map_1_cords)):
-        #     cv2.rectangle(img_rgb, (map_1_cords[i][0], map_1_cords[i][1]), (map_1_cords[i][2], map_1_cords[i][3]), (0, 255, 0), 1)
-        #
-        # for i in range(len(map_2_cords)):
-        #     cv2.rectangle(img_rgb, (map_2_cords[i][0], map_2_cords[i][1]), (map_2_cords[i][2], map_2_cords[i][3]), (255, 0, 0), 1)
-        # for i in range(len(map_3_cords)):
-        #     cv2.rectangle(img_rgb, (map_3_cords[i][0], map_3_cords[i][1]), (map_3_cords[i][2], map_3_cords[i][3]), (255, 255, 255), 1)
+            #show all fields
+            # for i in range(len(map_0_cords)):
+            #     cv2.rectangle(img_rgb, (map_0_cords[i][0], map_0_cords[i][1]), (map_0_cords[i][2], map_0_cords[i][3]), (0, 0, 255), 1)
+            #
+            # for i in range(len(map_1_cords)):
+            #     cv2.rectangle(img_rgb, (map_1_cords[i][0], map_1_cords[i][1]), (map_1_cords[i][2], map_1_cords[i][3]), (0, 255, 0), 1)
+            #
+            # for i in range(len(map_2_cords)):
+            #     cv2.rectangle(img_rgb, (map_2_cords[i][0], map_2_cords[i][1]), (map_2_cords[i][2], map_2_cords[i][3]), (255, 0, 0), 1)
+            # for i in range(len(map_3_cords)):
+            #     cv2.rectangle(img_rgb, (map_3_cords[i][0], map_3_cords[i][1]), (map_3_cords[i][2], map_3_cords[i][3]), (255, 255, 255), 1)
 
-        print(check_if_in_area(MPx, MPy + trows))
+            print(check_if_in_area(MPx, MPy + trows,mode2))
 
-        # Step 3: Draw the rectangle on large_image
-        #cv2.rectangle(img_rgb, (MPx, MPy), (MPx + tcols, MPy + trows), (0, 0, 255), 2)
+            # Step 3: Draw the rectangle on large_image
+            cv2.rectangle(img_rgb, (MPx, MPy), (MPx + tcols, MPy + trows), (0, 0, 255), 1)
+            #cv2.rectangle(img_rgb, (MPx, MPy), (MPx + tcols, MPy + trows), (0, 0, 255), 2)
 
         # Display the original image with the rectangle around the match.
-        #cv2.imshow('output', img_rgb)
+        cv2.imshow('output', img_rgb)
 
         # The image is only displayed if we call this
-        #cv2.waitKey(0)
+        cv2.waitKey(0)
 
     if mode == 2:
 
+        place = ""
+        location = ""
         res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
-        threshold = 0.8
-        print (res)
+        threshold = 0.37
         loc = np.where( res >= threshold)
-        for pt in zip(*loc[::-1]):
-            cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0,0,255), 2)
 
-        print(pt, (pt[0] + w, pt[1] + h))
+        # for i in range(len(map_0_cords)):
+        #     cv2.rectangle(img_rgb, (map_0_cords[i][0], map_0_cords[i][1]), (map_0_cords[i][2], map_0_cords[i][3]),
+        #                   (0, 0, 255), 1)
+        #
+        # for i in range(len(map_1_cords)):
+        #     cv2.rectangle(img_rgb, (map_1_cords[i][0], map_1_cords[i][1]), (map_1_cords[i][2], map_1_cords[i][3]),
+        #                   (0, 255, 0), 1)
+        #
+        # for i in range(len(map_2_cords)):
+        #     cv2.rectangle(img_rgb, (map_2_cords[i][0], map_2_cords[i][1]), (map_2_cords[i][2], map_2_cords[i][3]),
+        #                   (255, 0, 0), 1)
+        # for i in range(len(map_3_cords)):
+        #     cv2.rectangle(img_rgb, (map_3_cords[i][0], map_3_cords[i][1]), (map_3_cords[i][2], map_3_cords[i][3]),
+        #                   (255, 255, 255), 1)
+
+        for pt in zip(*loc[::-1]):
+            place, location = (check_if_in_area(pt[0], pt[1] + h, mode2))
+            #print(place)
+            cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (255,255,255), 1)
+
+        #if place == "":
+        #    return 0
+
         cv2.imshow('output', img_rgb)
         cv2.waitKey(0)
+        return 1
 
 
-main()
-
-#looking(1)
 
 
-pid = 2736
-current_player_offset = '7FDF70'
-user_offset = '7D28D0'
-
+#looking(2)
 # # #
 # PROCESS_ALL_ACCESS = 0x1F0FFF
 # processHandle = win32api.OpenProcess(PROCESS_ALL_ACCESS, False, pid)
@@ -471,8 +556,11 @@ def check_in_memory_for_user_data_and_get_true_base_memory (fourLetters, p_pid):
             return module
 
 
-#true_base_memory = (check_in_memory_for_user_data_and_get_true_base_memory ('Kamo', 4760))
+#true_base_memory = (check_in_memory_for_user_data_and_get_true_base_memory ('Kamo', 18256))
 #
 #print(true_base_memory)
 #
-#print(get_turn_current_player(true_base_memory, 4760))
+#print(get_turn_current_player(true_base_memory, 18256))
+#main()
+
+looking(2,0)
