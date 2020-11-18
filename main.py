@@ -346,15 +346,15 @@ def looking(mode, mode2):
     #mode: 1 - signle search 2 - all higher then threshold
     #mode2: 0 - normal 1 -top
     #img_rgb = cv2.imread('ssmanipulations/screenshot.bmp')
-    img_rgb = cv2.imread('ssmanipulations/screenshot_small.bmp')
-    img_rgb2 = cv2.imread('ssmanipulations/screenshot_small.bmp',0)
+    img_rgb = cv2.imread('ssmanipulations/screenshot.bmp')
+    img_rgb2 = cv2.imread('ssmanipulations/screenshot.bmp',0)
     img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
-    template = cv2.imread('ssmanipulations/wholeback.png',0)
+    template = cv2.imread('ssmanipulations/wholeback_2.png',0)
     screen_w, screen_h = img_rgb2.shape[::-1]
     w, h = template.shape[::-1]
 
-    x_to_X_template = 1363/1936
-    y_to_Y_template = 537/1096
+    x_to_X_template = 1349/1936
+    y_to_Y_template = 523/1096
 
     x_to_X_current = w/screen_w
     y_to_Y_current = h/screen_h
@@ -362,6 +362,10 @@ def looking(mode, mode2):
     x_scale = x_to_X_template/x_to_X_current
     y_scale = y_to_Y_template/y_to_Y_current
 
+    print(screen_w)
+    print(screen_h)
+    print(x_scale)
+    print(y_scale)
     # resizing screen for right resoluction
     if (x_scale != 1 and y_scale != 1):
         width = int(template.shape[1] * x_scale)
@@ -525,16 +529,19 @@ def looking(mode, mode2):
                 #print(str(x_for_single) + " " + str(y_for_single))
                 x_cor, y_cor = get_basic_map_points(playable_board_size_x,playable_board_size_y)
 
-                for i in range(len(x_cor)):
+                for j in range(len(y_cor)):
+
                     row_master_cord_matrix = []
-                    for j in range(len(y_cor)):
+                    for i in range(len(x_cor)):
                         temp_matrix = []
                         temp_matrix.append(x_cor[i])
                         temp_matrix.append(y_cor[j])
                         row_master_cord_matrix.append(temp_matrix)
                     master_cord_matrix.append(row_master_cord_matrix)
 
-
+                print(w)
+                print(h)
+                transform_master_matrix(master_cord_matrix,w,h,x_scale,y_scale)
                 for i in range(len(master_cord_matrix)-1):
                     print(master_cord_matrix[i])
                     for j in range(len(master_cord_matrix[i]) - 1):
@@ -568,6 +575,37 @@ def looking(mode, mode2):
 # print (hex(base_addr))
 #
 #
+
+def transform_master_matrix(matrix,width,hight,x_scale,y_scale):
+
+    tg1 = 2.07
+    tg2 = 2.9
+    tg3 = 4.83
+    tg4 = 14.51
+
+    for i in range(len(matrix)):
+        print(matrix[i])
+        for j in range(len(matrix[i])):
+
+            #matrix[i][j][1] = matrix[i][j][1] - round((matrix[i][j][1]/hight))
+            if j == 0:
+                matrix[i][j][0] = matrix[i][j][0] + round((hight / tg1) - (matrix[i][j][1] / tg1))
+            if j == 1:
+                matrix[i][j][0] = matrix[i][j][0] + round((hight / tg2) - (matrix[i][j][1] / tg2))
+            if j == 2:
+                matrix[i][j][0] = matrix[i][j][0] + round((hight / tg3) - (matrix[i][j][1] / tg3))
+            if j == 3:
+                matrix[i][j][0] = matrix[i][j][0] + round((hight / tg4) - (matrix[i][j][1] / tg4))
+            if j == 4:
+                matrix[i][j][0] = matrix[i][j][0] - round((hight / tg4) - (matrix[i][j][1] / tg4))
+            if j == 5:
+                matrix[i][j][0] = matrix[i][j][0] - round((hight / tg3) - (matrix[i][j][1] / tg3))
+            if j == 6:
+                matrix[i][j][0] = matrix[i][j][0] - round((hight / tg2) - (matrix[i][j][1] / tg2))
+            if j == 7:
+                matrix[i][j][0] = matrix[i][j][0] - round((hight / tg1) - (matrix[i][j][1] / tg1))
+
+    #print(matrix)
 
 def get_basic_map_points (x,y):
 
