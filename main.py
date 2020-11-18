@@ -50,7 +50,7 @@ map_width = 7
 # board height
 map_height = 7
 
-game_pid = 18256
+game_pid = 3332
 steam_name_4_lett = "Kamo"
 true_base_memory = 0
 player_character = 'Roboute Guilliman'
@@ -82,26 +82,26 @@ def main ():
 
     while True:
 
-        #print(get_turn_current_player(true_base_memory, game_pid))
+        print(get_turn_current_player(true_base_memory, game_pid))
         position = win32gui.GetWindowRect(pid)
         offsetx, offsety, win_width, win_height = GetWindowRect(pid)
         background_screenshot(pid, win_width - offsetx, win_height - offsety)
 
         scroll_back(game_pid,1)
 
-        if found_player == 0:
-            print("Before Search_mode" + str(search_mode) + " Player found" + str(found_player))
-            found_player = looking(2, search_mode)
-
-            print("Search_mode" + str(search_mode) + " Player found" + str(found_player))
-
-            if found_player == 0:
-                click_on_not_found_location(game_pid)
-                scroll_forward(game_pid)
-                #print("Scrolled forward")
-
-            if found_player == 1:
-                scroll_back(game_pid,0)
+        # if found_player == 0:
+        #     print("Before Search_mode" + str(search_mode) + " Player found" + str(found_player))
+        #     found_player = looking(2, search_mode)
+        #
+        #     print("Search_mode" + str(search_mode) + " Player found" + str(found_player))
+        #
+        #     if found_player == 0:
+        #         click_on_not_found_location(game_pid)
+        #         scroll_forward(game_pid)
+        #         #print("Scrolled forward")
+        #
+        #     if found_player == 1:
+        #         scroll_back(game_pid,0)
 
 
 
@@ -346,12 +346,30 @@ def looking(mode, mode2):
     #mode: 1 - signle search 2 - all higher then threshold
     #mode2: 0 - normal 1 -top
     #img_rgb = cv2.imread('ssmanipulations/screenshot.bmp')
-    img_rgb = cv2.imread('ssmanipulations/screenshot.bmp')
+    img_rgb = cv2.imread('ssmanipulations/screenshot_small.bmp')
+    img_rgb2 = cv2.imread('ssmanipulations/screenshot_small.bmp',0)
     img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
     template = cv2.imread('ssmanipulations/wholeback.png',0)
+    screen_w, screen_h = img_rgb2.shape[::-1]
     w, h = template.shape[::-1]
 
+    x_to_X_template = 1363/1936
+    y_to_Y_template = 537/1096
 
+    x_to_X_current = w/screen_w
+    y_to_Y_current = h/screen_h
+
+    x_scale = x_to_X_template/x_to_X_current
+    y_scale = y_to_Y_template/y_to_Y_current
+
+    # resizing screen for right resoluction
+    if (x_scale != 1 and y_scale != 1):
+        width = int(template.shape[1] * x_scale)
+        height = int(template.shape[0] * y_scale)
+        dim = (width, height)
+        # resize image
+        template = cv2.resize(template, dim, interpolation=cv2.INTER_AREA)
+        w, h = template.shape[::-1]
 
     if mode == 1:
         res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED )
@@ -383,7 +401,8 @@ def looking(mode, mode2):
             # for i in range(len(map_3_cords)):
             #     cv2.rectangle(img_rgb, (map_3_cords[i][0], map_3_cords[i][1]), (map_3_cords[i][2], map_3_cords[i][3]), (255, 255, 255), 1)
 
-            print(check_if_in_area(MPx, MPy + trows,mode2))
+            place, location =  check_if_in_area(MPx, MPy + trows,mode2)
+            # print(place)
 
             # Step 3: Draw the rectangle on large_image
             cv2.rectangle(img_rgb, (MPx, MPy), (MPx + tcols, MPy + trows), (0, 0, 255), 1)
@@ -394,13 +413,15 @@ def looking(mode, mode2):
 
         # The image is only displayed if we call this
         cv2.waitKey(0)
+        return 1
 
     if mode == 2:
 
-        place = ""
-        location = ""
+        threshold = 0.38
+        print(w)
+        print(h)
+
         res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
-        threshold = 0.37
         loc = np.where( res >= threshold)
 
         # for i in range(len(map_0_cords)):
@@ -418,19 +439,120 @@ def looking(mode, mode2):
         #     cv2.rectangle(img_rgb, (map_3_cords[i][0], map_3_cords[i][1]), (map_3_cords[i][2], map_3_cords[i][3]),
         #                   (255, 255, 255), 1)
 
+         #print(w)
+        #print(h)
+        iterations_found = 0
         for pt in zip(*loc[::-1]):
             place, location = (check_if_in_area(pt[0], pt[1] + h, mode2))
             #print(place)
+
+            #print (pt[0])
+            #print (pt[1])
+
             cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (255,255,255), 1)
+
+            #print("Threshold:" + str(threshold) + " Precision:" + str(precision_number))
 
         #if place == "":
         #    return 0
-
         cv2.imshow('output', img_rgb)
         cv2.waitKey(0)
         return 1
 
+    if mode == 3:
 
+        iterations_found = 0
+        stop_loop = 0
+        find_one = 1
+        precision_number = 1
+        x_for_single = 0
+        y_for_single = 0
+        place = ""
+        location = ""
+        x_cor = []
+        y_cor = []
+        x_cords_matrix = []
+        y_cords_matrix = []
+        row_master_cord_matrix = []
+        master_cord_matrix = []
+        temp_matrix =[]
+        # print(screen_w)
+        # print(w)
+        # print(screen_h)
+        # print(h)
+        # print(w/screen_w)
+        # print(h/screen_h)
+
+        #width = int(template.shape[1] * scale_percent / 100)
+        #height = int(template.shape[0] * scale_percent / 100)
+        #dim = (width, height)
+
+        #template = cv2.resize(template, dim, interpolation=cv2.INTER_AREA)
+
+
+        res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
+        threshold = 0.3
+
+        while stop_loop == 0:
+            res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
+            loc = np.where(res >= threshold)
+
+
+            iterations_found = 0
+            for pt in zip(*loc[::-1]):
+                place, location = (check_if_in_area(pt[0], pt[1] + h, mode2))
+            #print(place)
+                iterations_found += 1
+                #print (pt[0])
+                #print (pt[1])
+                x_for_single = pt[0]
+                y_for_single = pt[1]
+                if (find_one == 0):
+                    cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (255,255,255), 1)
+
+            #print("Threshold:" + str(threshold) + " Precision:" + str(precision_number))
+
+            if iterations_found > 1:
+                threshold += 0.2/precision_number
+            if iterations_found == 0:
+                threshold -= 0.1/precision_number
+                precision_number += 1
+            if iterations_found == 1:
+
+                playable_board_size_x = w
+                playable_board_size_y = h
+
+                #print(str(x_for_single) + " " + str(y_for_single))
+                x_cor, y_cor = get_basic_map_points(playable_board_size_x,playable_board_size_y)
+
+                for i in range(len(x_cor)):
+                    row_master_cord_matrix = []
+                    for j in range(len(y_cor)):
+                        temp_matrix = []
+                        temp_matrix.append(x_cor[i])
+                        temp_matrix.append(y_cor[j])
+                        row_master_cord_matrix.append(temp_matrix)
+                    master_cord_matrix.append(row_master_cord_matrix)
+
+
+                for i in range(len(master_cord_matrix)-1):
+                    print(master_cord_matrix[i])
+                    for j in range(len(master_cord_matrix[i]) - 1):
+                        cv2.rectangle(img_rgb, (master_cord_matrix[i][j][0] + x_for_single, master_cord_matrix[i][j][1] + y_for_single), (master_cord_matrix[i+1][j+1][0] + x_for_single, master_cord_matrix[i+1][j+1][1] + y_for_single), (0, 0, 255), 1)
+                #for i in range(len(x_cords_matrix)-1):
+                #    for j in range(len(y_cords_matrix)-1):
+                #        cv2.rectangle(img_rgb, (x_cords_matrix[j]+x_for_single, y_cords_matrix[i])+y_for_single, (x_cords_matrix[j+1]+x_for_single, y_cords_matrix[i+1]+y_for_single), (0, 0, 255), 1)
+                #print(x_cords_matrix)
+                #print(y_cords_matrix)
+                #cv2.rectangle(img_rgb, (w+x_cor[i], h+y_cor[j]), (w+x_cor[i]-1, h+y_cor[j]-1), (0, 0, 255), 1)
+
+                #cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (255, 255, 255), 1)
+                stop_loop = 1
+        #if place == "":
+        #    return 0
+        cv2.imshow('output', img_rgb)
+        cv2.waitKey(0)
+        return 1
 
 
 #looking(2)
@@ -447,6 +569,19 @@ def looking(mode, mode2):
 #
 #
 
+def get_basic_map_points (x,y):
+
+    x_cor = []
+    y_cor = []
+    for i in range (8):
+        x_cor.append(round((x*i)/7))
+        y_cor.append(round((y*i)/7))
+    print (x)
+    print (y)
+    print (x_cor)
+    print (y_cor)
+
+    return x_cor, y_cor
 
 
 def read_process_memory(process_id, address, offsets, size_of_data=8):
@@ -466,7 +601,6 @@ def read_process_memory(process_id, address, offsets, size_of_data=8):
 
 
     return data.value
-
 
 
 #
@@ -563,4 +697,4 @@ def check_in_memory_for_user_data_and_get_true_base_memory (fourLetters, p_pid):
 #print(get_turn_current_player(true_base_memory, 18256))
 #main()
 
-looking(2,0)
+looking(3,0)
