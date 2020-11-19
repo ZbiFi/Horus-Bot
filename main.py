@@ -1,5 +1,6 @@
 
 import ctypes
+import math
 
 import cv2
 
@@ -30,15 +31,15 @@ map_3_field_count = 1
 
 map_0 = ['Isstvann V', 'The Halo Starts', 'Caliban', 'The Rubicon Straits', 'Port Maw', 'The Ghoul Stars', 'Signus Prime', 'The Death of Reason', 'The Maelstorm', 'The Eastern Fringe', 'Tigrus', 'The Thirteen Realms', 'Macragge', 'Calth', 'Deliverance', 'The Charadon Sector', 'Prospero', 'The Golgothan Wastes', 'Nikaea', 'The Veiled Region', 'The Phall System', 'The Intergalactic Void', 'Lucius', 'The Isstvan Asteroid Range']
 #cords [x1;y1;x2;y2]
-map_0_cords = [[523 , 130, 652, 181],[653 , 130, 772, 181],[773 , 130, 899, 181],[900 , 130, 1019, 181],[1020 , 130, 1139, 181],[1140 , 130, 1262, 181],[1263 , 130, 1407, 181],[1302, 182, 1433, 238],[1317, 239, 1462, 301],[1338 , 302, 1495, 371],[1362, 372, 1534, 454],[1392, 455, 1573,548],[1428, 549, 1660, 661],[1233, 549, 1402, 661],[1050, 549, 1232, 661],[875, 549, 1049, 661],[695, 549, 863, 661],[517, 549, 673, 661],[324, 549, 492, 661],[360, 455, 526,548],[398, 372, 561, 454],[435, 302, 590, 371],[466, 239, 611, 301],[500 , 182, 626, 238]]
+map_0_cords = []
 map_0_if_top = ['The Halo Starts', 'Caliban', 'The Rubicon Straits', 'Port Maw']
 map_0_cords_if_top =[[334, 273, 540, 396],[584, 273, 818, 396],[883, 273, 1080, 396],[1090, 273, 1377, 396]]
 map_1 = ['Isstvann III', 'Warp Storm', 'Eye of Terror', 'Warp Storm', 'Davin', 'The Dominion of Storms', 'Paramar', 'The Kayvas Belt', 'Tallarn', 'The Uhulis Sector', 'Luna', 'Cthonia', 'Titan', 'The Mandragoran Sector', 'Mars', 'The Stellar Wastes']
-map_1_cords = [[650 , 182, 767, 238],[775 , 182, 895, 238],[900 , 182, 1024, 238],[1025, 182, 1157, 238],[1158, 182, 1301, 238],[1168, 239, 1300, 301],[1182 , 302, 1319, 371],[1194, 372, 1341, 455],[1210, 455, 1373,548],[1040, 455, 1209,548],[884, 455, 1050,548],[725, 455, 874,548],[565, 455, 711,548],[592, 372, 732, 455],[609 , 302, 746, 371],[628, 239, 758, 301]]
+map_1_cords = []
 map_2 = ['The Outer Palace', 'The Inner Palace', 'The Outer Palace', 'Damocles Startport', 'Arcus Orbital Plate', 'Spaceport Primus', 'Lemurya Orbital Plate', 'The Wastes']
-map_2_cords = [[781, 239, 898, 301],[901, 239, 1021, 301],[1018, 239, 1145, 301],[1024 , 302, 1154, 371],[1028, 372, 1166, 454],[897, 372, 1027, 454],[762, 372, 892, 454],[770 , 302, 892, 371]]
+map_2_cords = []
 map_3 = ['The Final Battle']
-map_3_cords = [[899 , 302, 1023, 371]]
+map_3_cords = []
 pytesseract.pytesseract.tesseract_cmd = "C:\\Program Files (x86)\\Tesseract-OCR\\tesseract.exe"
 # Players positions (mapId, fieldId, status (0 - no player 1 - player in game)
 players_status_map = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
@@ -50,7 +51,7 @@ map_width = 7
 # board height
 map_height = 7
 
-game_pid = 3332
+game_pid = 13180
 steam_name_4_lett = "Kamo"
 true_base_memory = 0
 player_character = 'Roboute Guilliman'
@@ -72,47 +73,55 @@ def main ():
     win_width = 0
     win_height = 0
     player_turn = 0
+    location_string = ""
+    location = 0
+    map_number = 0
     win32gui.EnumWindows(enum_win, toplist)
     # Game handle
     pid = 0
     pid = win32gui.FindWindow(None, 'Talisman : The Horus Heresy')
-
     true_base_memory = check_in_memory_for_user_data_and_get_true_base_memory(steam_name_4_lett, game_pid)
     #print(true_base_memory)
+    looking(3, 0)  # loadCORDS for given resolution
 
     while True:
 
-        print(get_turn_current_player(true_base_memory, game_pid))
+
+        #print(get_turn_current_player(true_base_memory, game_pid,player_character))
         position = win32gui.GetWindowRect(pid)
         offsetx, offsety, win_width, win_height = GetWindowRect(pid)
         background_screenshot(pid, win_width - offsetx, win_height - offsety)
 
+
         scroll_back(game_pid,1)
 
-        # if found_player == 0:
-        #     print("Before Search_mode" + str(search_mode) + " Player found" + str(found_player))
-        #     found_player = looking(2, search_mode)
-        #
-        #     print("Search_mode" + str(search_mode) + " Player found" + str(found_player))
-        #
-        #     if found_player == 0:
-        #         click_on_not_found_location(game_pid)
-        #         scroll_forward(game_pid)
-        #         #print("Scrolled forward")
-        #
-        #     if found_player == 1:
-        #         scroll_back(game_pid,0)
+        if found_player == 0:
+            #print("Before Search_mode" + str(search_mode) + " Player found" + str(found_player))
 
+            print("Looking for Player in the marked area...")
+            found_player, location_string, location, map_number = looking(2, search_mode)
 
+            #print("Search_mode" + str(search_mode) + " Player found" + str(found_player))
+            if found_player == 0:
+                print("Looking for Player on Top")
+                click_on_not_found_location(game_pid)
+                scroll_forward(game_pid)
+                print("Scrolled forward")
+            if found_player == 1:
 
-        #load player stats
-        if players_stats_map_status == 0:
-            players_stats_map_status = load_player_stats(players_stats_map_status)
-            #print(players_stats_map)
+                print("Scrolled back")
+                scroll_back(game_pid,0)
 
-        #check_if_roll_needed
-        #if (if_waiting_for_roll()):
-        #    press_space(pid)
+        if found_player == 1:
+            print("Player found on: " + str(location_string) + "DEBUG: " + str(location) + " " + str(map_number))
+            #load player stats
+            if players_stats_map_status == 0:
+                players_stats_map_status = load_player_stats(players_stats_map_status)
+                #print(players_stats_map)
+
+            #check_if_roll_needed
+            #if (if_waiting_for_roll()):
+            #    press_space(pid)
 
         #check_fragment(1750, 650, 1820, 720, 'dice')
         #filename = 'ssmanipulations/' + 'dice' + '.jpg'
@@ -168,7 +177,7 @@ def scroll_forward (pid):
     global search_mode
     win32api.SendMessage(pid,  win32con.MOUSE_WHEELED, (win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, 1, 0)))
     search_mode = 1
-    time.sleep(1)
+    time.sleep(2)
 
 def press_space (pid):
 
@@ -262,10 +271,10 @@ def check_fragment(left,top,right,bottom, filename):
 
 def if_waiting_for_roll():
 
-    filename = 'temp'
+    filename = 'role_dice'
 
     check_fragment(1670, 730, 1890, 760, filename)
-    if compare('ssmanipulations/' + filename + '.jpg',1) == 1:
+    if compare('templates/' + filename + '.jpg',1) == 1:
         #print("Waiting for roll")
         return True
     else:
@@ -324,20 +333,20 @@ def check_if_in_area(x,y,mode2):
     if mode2 ==0:
         for i in range(len(map_0_cords)):
             if x <map_0_cords[i][2] and x >map_0_cords[i][0] and y<map_0_cords[i][3] and y>map_0_cords[i][1]:
-                return (map_0[i],i)
+                return (map_0[i],i,0)
         for i in range(len(map_1_cords)):
             if x <map_1_cords[i][2] and x >map_1_cords[i][0] and y<map_1_cords[i][3] and y>map_1_cords[i][1]:
-                return (map_1[i],i)
+                return (map_1[i],i,1)
         for i in range(len(map_2_cords)):
             if x <map_2_cords[i][2] and x >map_2_cords[i][0] and y<map_2_cords[i][3] and y>map_2_cords[i][1]:
-                return (map_2[i],i)
+                return (map_2[i],i,2)
         for i in range(len(map_3_cords)):
             if x <map_3_cords[i][2] and x >map_3_cords[i][0] and y<map_3_cords[i][3] and y>map_3_cords[i][1]:
-                return (map_3[i],i)
+                return (map_3[i],i,3)
     if mode2 ==1:
         for i in range(len(map_0_cords_if_top)):
             if x <map_0_cords_if_top[i][2] and x >map_0_cords_if_top[i][0] and y<map_0_cords_if_top[i][3] and y>map_0_cords_if_top[i][1]:
-                return (map_0_if_top[i],i)
+                return (map_0_if_top[i],i,0)
 
     return 0,0
 
@@ -349,31 +358,32 @@ def looking(mode, mode2):
     img_rgb = cv2.imread('ssmanipulations/screenshot.bmp')
     img_rgb2 = cv2.imread('ssmanipulations/screenshot.bmp',0)
     img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
-    template = cv2.imread('ssmanipulations/wholeback_2.png',0)
     screen_w, screen_h = img_rgb2.shape[::-1]
-    w, h = template.shape[::-1]
 
-    x_to_X_template = 1349/1936
-    y_to_Y_template = 523/1096
+    x_to_X_template = 1349 / 1936
+    y_to_Y_template = 523 / 1096
+
+    if mode == 1 or mode == 2:
+        template = cv2.imread('ssmanipulations/rob2.png', 0)
+    if mode == 3:
+        template = cv2.imread('ssmanipulations/wholeback_2.png', 0)
+
+    w, h = template.shape[::-1]
 
     x_to_X_current = w/screen_w
     y_to_Y_current = h/screen_h
 
     x_scale = x_to_X_template/x_to_X_current
     y_scale = y_to_Y_template/y_to_Y_current
-
-    print(screen_w)
-    print(screen_h)
-    print(x_scale)
-    print(y_scale)
-    # resizing screen for right resoluction
-    if (x_scale != 1 and y_scale != 1):
-        width = int(template.shape[1] * x_scale)
-        height = int(template.shape[0] * y_scale)
-        dim = (width, height)
-        # resize image
-        template = cv2.resize(template, dim, interpolation=cv2.INTER_AREA)
-        w, h = template.shape[::-1]
+    if mode == 3:
+        # resizing screen for right resoluction
+        if (x_scale != 1 and y_scale != 1):
+            width = int(template.shape[1] * x_scale)
+            height = int(template.shape[0] * y_scale)
+            dim = (width, height)
+            # resize image
+            template = cv2.resize(template, dim, interpolation=cv2.INTER_AREA)
+            w, h = template.shape[::-1]
 
     if mode == 1:
         res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED )
@@ -417,13 +427,16 @@ def looking(mode, mode2):
 
         # The image is only displayed if we call this
         cv2.waitKey(0)
-        return 1
+        return 1, None, None, None
 
     if mode == 2:
 
-        threshold = 0.38
-        print(w)
-        print(h)
+        place = ""
+        location = 0
+        map_number = 0
+        threshold = 0.6
+        #print(w)
+        #print(h)
 
         res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
         loc = np.where( res >= threshold)
@@ -443,27 +456,29 @@ def looking(mode, mode2):
         #     cv2.rectangle(img_rgb, (map_3_cords[i][0], map_3_cords[i][1]), (map_3_cords[i][2], map_3_cords[i][3]),
         #                   (255, 255, 255), 1)
 
-         #print(w)
-        #print(h)
-        iterations_found = 0
+
         for pt in zip(*loc[::-1]):
-            place, location = (check_if_in_area(pt[0], pt[1] + h, mode2))
+            place, location, map_number = (check_if_in_area(pt[0], pt[1] + h, mode2))
             #print(place)
 
             #print (pt[0])
             #print (pt[1])
 
-            cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (255,255,255), 1)
+            #cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (255,255,255), 1)
 
             #print("Threshold:" + str(threshold) + " Precision:" + str(precision_number))
 
-        #if place == "":
-        #    return 0
+        #print(place)
+        if place == "":
+            return 0, "", -1, -1
         cv2.imshow('output', img_rgb)
-        cv2.waitKey(0)
-        return 1
+        cv2.waitKey(10)
+        #print (place)
+        #print (location)
+        #print(map_number)
+        return 1, place, location, map_number
 
-    if mode == 3:
+    if mode == 3: #for creating map cords
 
         iterations_found = 0
         stop_loop = 0
@@ -480,19 +495,6 @@ def looking(mode, mode2):
         row_master_cord_matrix = []
         master_cord_matrix = []
         temp_matrix =[]
-        # print(screen_w)
-        # print(w)
-        # print(screen_h)
-        # print(h)
-        # print(w/screen_w)
-        # print(h/screen_h)
-
-        #width = int(template.shape[1] * scale_percent / 100)
-        #height = int(template.shape[0] * scale_percent / 100)
-        #dim = (width, height)
-
-        #template = cv2.resize(template, dim, interpolation=cv2.INTER_AREA)
-
 
         res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
         threshold = 0.3
@@ -504,8 +506,7 @@ def looking(mode, mode2):
 
             iterations_found = 0
             for pt in zip(*loc[::-1]):
-                place, location = (check_if_in_area(pt[0], pt[1] + h, mode2))
-            #print(place)
+
                 iterations_found += 1
                 #print (pt[0])
                 #print (pt[1])
@@ -539,27 +540,39 @@ def looking(mode, mode2):
                         row_master_cord_matrix.append(temp_matrix)
                     master_cord_matrix.append(row_master_cord_matrix)
 
-                print(w)
-                print(h)
-                transform_master_matrix(master_cord_matrix,w,h,x_scale,y_scale)
-                for i in range(len(master_cord_matrix)-1):
-                    print(master_cord_matrix[i])
-                    for j in range(len(master_cord_matrix[i]) - 1):
-                        cv2.rectangle(img_rgb, (master_cord_matrix[i][j][0] + x_for_single, master_cord_matrix[i][j][1] + y_for_single), (master_cord_matrix[i+1][j+1][0] + x_for_single, master_cord_matrix[i+1][j+1][1] + y_for_single), (0, 0, 255), 1)
+                #print(w)
+                #print(h)
+                #print(x_for_single)
+                #print(y_for_single)
+                matrix = transform_master_matrix(master_cord_matrix,w,h,x_scale,y_scale)
+                populate_maps_with_cords(matrix,x_for_single,y_for_single)
+
+                # for i in range(len(map_0_cords)):
+                #     cv2.rectangle(img_rgb, (map_0_cords[i][0], map_0_cords[i][1]), (map_0_cords[i][2], map_0_cords[i][3]), (0, 255, 255), 1)
+                # for i in range(len(map_1_cords)):
+                #     cv2.rectangle(img_rgb, (map_1_cords[i][0], map_1_cords[i][1]), (map_1_cords[i][2], map_1_cords[i][3]), (0, 255, 0), 1)
+                # for i in range(len(map_2_cords)):
+                #     cv2.rectangle(img_rgb, (map_2_cords[i][0], map_2_cords[i][1]), (map_2_cords[i][2], map_2_cords[i][3]), (255, 0, 0), 1)
+                # for i in range(len(map_3_cords)):
+                #     cv2.rectangle(img_rgb, (map_3_cords[i][0], map_3_cords[i][1]), (map_3_cords[i][2], map_3_cords[i][3]), (255, 255, 255), 1)
+
+                #for i in range(len(master_cord_matrix)-1):
+                #   print(master_cord_matrix[i])
+                #   for j in range(len(master_cord_matrix[i]) - 1):
+                #       cv2.rectangle(img_rgb, (master_cord_matrix[i][j][0] + x_for_single, master_cord_matrix[i][j][1] + y_for_single), (master_cord_matrix[i+1][j+1][0] + x_for_single, master_cord_matrix[i+1][j+1][1] + y_for_single), (0, 0, 255), 1)
                 #for i in range(len(x_cords_matrix)-1):
                 #    for j in range(len(y_cords_matrix)-1):
                 #        cv2.rectangle(img_rgb, (x_cords_matrix[j]+x_for_single, y_cords_matrix[i])+y_for_single, (x_cords_matrix[j+1]+x_for_single, y_cords_matrix[i+1]+y_for_single), (0, 0, 255), 1)
                 #print(x_cords_matrix)
                 #print(y_cords_matrix)
-                #cv2.rectangle(img_rgb, (w+x_cor[i], h+y_cor[j]), (w+x_cor[i]-1, h+y_cor[j]-1), (0, 0, 255), 1)
 
                 #cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (255, 255, 255), 1)
                 stop_loop = 1
         #if place == "":
         #    return 0
         cv2.imshow('output', img_rgb)
-        cv2.waitKey(0)
-        return 1
+        cv2.waitKey(10)
+        return 1, None, None, None
 
 
 #looking(2)
@@ -578,34 +591,470 @@ def looking(mode, mode2):
 
 def transform_master_matrix(matrix,width,hight,x_scale,y_scale):
 
+    #obliczanie tangesów kątów linii pochyłych (dane 1- x.... wybrane z proporcji z pixeli)
     tg1 = 2.07
+    tg1v2 = hight/(width*(1-0.826)) #~2,234
     tg2 = 2.9
+    tg2v2 = hight/(width*(0.862-0.734)) #~3,037
     tg3 = 4.83
+    tg3v2 = hight / (width*(0.719-0.64))  # ~4,921
     tg4 = 14.51
+    tg4v2 = hight / (width*(0.573-0.55))  # ~16,903
+
+    #offsets to y axis
+    y0 = 0 * hight
+    y1 = 0.088 * hight
+    y2 = 0.195 * hight
+    y3 = 0.317 * hight
+    y4 = 0.453 * hight
+    y5 = 0.612 * hight
+    y6 = 0.792 * hight
+    y7 = 1 * hight
+    y_offset = [y0,y1,y2,y3,y4,y5,y6,y7]
+
 
     for i in range(len(matrix)):
-        print(matrix[i])
+        #print(matrix[i])
         for j in range(len(matrix[i])):
 
             #matrix[i][j][1] = matrix[i][j][1] - round((matrix[i][j][1]/hight))
+            matrix[i][j][1] = round(y_offset[i])
             if j == 0:
-                matrix[i][j][0] = matrix[i][j][0] + round((hight / tg1) - (matrix[i][j][1] / tg1))
+                matrix[i][j][0] = matrix[i][j][0] + round((hight / tg1v2) - (matrix[i][j][1] / tg1v2)*1.3)
             if j == 1:
-                matrix[i][j][0] = matrix[i][j][0] + round((hight / tg2) - (matrix[i][j][1] / tg2))
+                matrix[i][j][0] = matrix[i][j][0] + round((hight / tg2v2) - (matrix[i][j][1] / tg2v2)*1.1)
             if j == 2:
-                matrix[i][j][0] = matrix[i][j][0] + round((hight / tg3) - (matrix[i][j][1] / tg3))
+                matrix[i][j][0] = matrix[i][j][0] + round((hight / tg3v2) - (matrix[i][j][1] / tg3v2)*1.1)
             if j == 3:
-                matrix[i][j][0] = matrix[i][j][0] + round((hight / tg4) - (matrix[i][j][1] / tg4))
+                matrix[i][j][0] = matrix[i][j][0] + round((hight / tg4v2) - (matrix[i][j][1] / tg4v2)*1.1)
             if j == 4:
-                matrix[i][j][0] = matrix[i][j][0] - round((hight / tg4) - (matrix[i][j][1] / tg4))
+                matrix[i][j][0] = matrix[i][j][0] - round((hight / tg4v2) - (matrix[i][j][1] / tg4v2)*1.1)
             if j == 5:
-                matrix[i][j][0] = matrix[i][j][0] - round((hight / tg3) - (matrix[i][j][1] / tg3))
+                matrix[i][j][0] = matrix[i][j][0] - round((hight / tg3v2) - (matrix[i][j][1] / tg3v2)*1.1)
             if j == 6:
-                matrix[i][j][0] = matrix[i][j][0] - round((hight / tg2) - (matrix[i][j][1] / tg2))
+                matrix[i][j][0] = matrix[i][j][0] - round((hight / tg2v2) - (matrix[i][j][1] / tg2v2)*1.1)
             if j == 7:
-                matrix[i][j][0] = matrix[i][j][0] - round((hight / tg1) - (matrix[i][j][1] / tg1))
+                matrix[i][j][0] = matrix[i][j][0] - round((hight / tg1v2) - (matrix[i][j][1] / tg1v2)*1.3)
 
-    #print(matrix)
+    return matrix
+
+def populate_maps_with_cords (matrix,x_offset,y_offset):
+
+    #!!!!!! X cords switch places for things on the right from centre of the map X1 <-> X2
+    # [Y][!X1!][0]
+    # [Y][!X1!][0]
+    # [Y][!X2!][0]
+    # [Y][!X2!][0]
+
+    global map_0_cords
+    global map_1_cords
+    global map_2_cords
+    global map_3_cords
+
+    map_0_cords = []
+    map_1_cords = []
+    map_2_cords = []
+    map_3_cords = []
+
+    temp_array = [] #map0 field 1
+
+    temp_array.append((matrix[0][0][0] + x_offset))
+    temp_array.append((matrix[0][0][1] + y_offset))
+    temp_array.append((matrix[1][1][0] + x_offset))
+    temp_array.append((matrix[1][1][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 2
+
+    temp_array.append((matrix[0][1][0] + x_offset))
+    temp_array.append((matrix[0][1][1] + y_offset))
+    temp_array.append((matrix[1][2][0] + x_offset))
+    temp_array.append((matrix[1][2][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 3
+
+    temp_array.append((matrix[0][2][0] + x_offset))
+    temp_array.append((matrix[0][2][1] + y_offset))
+    temp_array.append((matrix[1][3][0] + x_offset))
+    temp_array.append((matrix[1][3][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 4
+
+    temp_array.append((matrix[0][3][0] + x_offset))
+    temp_array.append((matrix[0][3][1] + y_offset))
+    temp_array.append((matrix[1][4][0] + x_offset))
+    temp_array.append((matrix[1][4][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 5
+
+    temp_array.append((matrix[0][5][0] + x_offset))
+    temp_array.append((matrix[0][5][1] + y_offset))
+    temp_array.append((matrix[1][4][0] + x_offset))
+    temp_array.append((matrix[1][4][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 6
+
+    temp_array.append((matrix[0][6][0] + x_offset))
+    temp_array.append((matrix[0][6][1] + y_offset))
+    temp_array.append((matrix[1][5][0] + x_offset))
+    temp_array.append((matrix[1][5][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 7
+
+    temp_array.append((matrix[0][7][0] + x_offset))
+    temp_array.append((matrix[0][7][1] + y_offset))
+    temp_array.append((matrix[1][6][0] + x_offset))
+    temp_array.append((matrix[1][6][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 8
+
+    temp_array.append((matrix[1][7][0] + x_offset))
+    temp_array.append((matrix[1][7][1] + y_offset))
+    temp_array.append((matrix[2][6][0] + x_offset))
+    temp_array.append((matrix[2][6][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 9
+
+    temp_array.append((matrix[2][7][0] + x_offset))
+    temp_array.append((matrix[2][7][1] + y_offset))
+    temp_array.append((matrix[3][6][0] + x_offset))
+    temp_array.append((matrix[3][6][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 10
+
+    temp_array.append((matrix[3][7][0] + x_offset))
+    temp_array.append((matrix[3][7][1] + y_offset))
+    temp_array.append((matrix[4][6][0] + x_offset))
+    temp_array.append((matrix[4][6][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 11
+
+    temp_array.append((matrix[4][7][0] + x_offset))
+    temp_array.append((matrix[4][7][1] + y_offset))
+    temp_array.append((matrix[5][6][0] + x_offset))
+    temp_array.append((matrix[5][6][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 12
+
+    temp_array.append((matrix[5][7][0] + x_offset))
+    temp_array.append((matrix[5][7][1] + y_offset))
+    temp_array.append((matrix[6][6][0] + x_offset))
+    temp_array.append((matrix[6][6][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 13
+
+    temp_array.append((matrix[6][7][0] + x_offset))
+    temp_array.append((matrix[6][7][1] + y_offset))
+    temp_array.append((matrix[7][6][0] + x_offset))
+    temp_array.append((matrix[7][6][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 14
+
+    temp_array.append((matrix[6][6][0] + x_offset))
+    temp_array.append((matrix[6][6][1] + y_offset))
+    temp_array.append((matrix[7][5][0] + x_offset))
+    temp_array.append((matrix[7][5][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 15
+
+    temp_array.append((matrix[6][5][0] + x_offset))
+    temp_array.append((matrix[6][5][1] + y_offset))
+    temp_array.append((matrix[7][4][0] + x_offset))
+    temp_array.append((matrix[7][4][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 16
+
+    temp_array.append((matrix[6][3][0] + x_offset))
+    temp_array.append((matrix[6][3][1] + y_offset))
+    temp_array.append((matrix[7][4][0] + x_offset))
+    temp_array.append((matrix[7][4][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 17
+
+    temp_array.append((matrix[6][2][0] + x_offset))
+    temp_array.append((matrix[6][2][1] + y_offset))
+    temp_array.append((matrix[7][3][0] + x_offset))
+    temp_array.append((matrix[7][3][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 18
+
+    temp_array.append((matrix[6][1][0] + x_offset))
+    temp_array.append((matrix[6][1][1] + y_offset))
+    temp_array.append((matrix[7][2][0] + x_offset))
+    temp_array.append((matrix[7][2][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 19
+
+    temp_array.append((matrix[6][0][0] + x_offset))
+    temp_array.append((matrix[6][0][1] + y_offset))
+    temp_array.append((matrix[7][1][0] + x_offset))
+    temp_array.append((matrix[7][1][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 20
+
+    temp_array.append((matrix[5][0][0] + x_offset))
+    temp_array.append((matrix[5][0][1] + y_offset))
+    temp_array.append((matrix[6][1][0] + x_offset))
+    temp_array.append((matrix[6][1][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 21
+
+    temp_array.append((matrix[4][0][0] + x_offset))
+    temp_array.append((matrix[4][0][1] + y_offset))
+    temp_array.append((matrix[5][1][0] + x_offset))
+    temp_array.append((matrix[5][1][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 22
+
+    temp_array.append((matrix[3][0][0] + x_offset))
+    temp_array.append((matrix[3][0][1] + y_offset))
+    temp_array.append((matrix[4][1][0] + x_offset))
+    temp_array.append((matrix[4][1][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 23
+
+    temp_array.append((matrix[2][0][0] + x_offset))
+    temp_array.append((matrix[2][0][1] + y_offset))
+    temp_array.append((matrix[3][1][0] + x_offset))
+    temp_array.append((matrix[3][1][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map0 field 24
+
+    temp_array.append((matrix[1][0][0] + x_offset))
+    temp_array.append((matrix[1][0][1] + y_offset))
+    temp_array.append((matrix[2][1][0] + x_offset))
+    temp_array.append((matrix[2][1][1] + y_offset))
+    map_0_cords.append(temp_array)
+
+    temp_array = [] #map1 field 1
+
+    temp_array.append((matrix[1][1][0] + x_offset))
+    temp_array.append((matrix[1][1][1] + y_offset))
+    temp_array.append((matrix[2][2][0] + x_offset))
+    temp_array.append((matrix[2][2][1] + y_offset))
+    map_1_cords.append(temp_array)
+
+    temp_array = [] #map1 field 2
+
+    temp_array.append((matrix[1][2][0] + x_offset))
+    temp_array.append((matrix[1][2][1] + y_offset))
+    temp_array.append((matrix[2][3][0] + x_offset))
+    temp_array.append((matrix[2][3][1] + y_offset))
+    map_1_cords.append(temp_array)
+
+    temp_array = [] #map1 field 3
+
+    temp_array.append((matrix[1][3][0] + x_offset))
+    temp_array.append((matrix[1][3][1] + y_offset))
+    temp_array.append((matrix[2][4][0] + x_offset))
+    temp_array.append((matrix[2][4][1] + y_offset))
+    map_1_cords.append(temp_array)
+
+    temp_array = [] #map1 field 4
+
+    temp_array.append((matrix[1][5][0] + x_offset))
+    temp_array.append((matrix[1][5][1] + y_offset))
+    temp_array.append((matrix[2][4][0] + x_offset))
+    temp_array.append((matrix[2][4][1] + y_offset))
+    map_1_cords.append(temp_array)
+
+    temp_array = [] #map1 field 5
+
+    temp_array.append((matrix[1][6][0] + x_offset))
+    temp_array.append((matrix[1][6][1] + y_offset))
+    temp_array.append((matrix[2][5][0] + x_offset))
+    temp_array.append((matrix[2][5][1] + y_offset))
+    map_1_cords.append(temp_array)
+
+    temp_array = [] #map1 field 6
+
+    temp_array.append((matrix[2][6][0] + x_offset))
+    temp_array.append((matrix[2][6][1] + y_offset))
+    temp_array.append((matrix[3][5][0] + x_offset))
+    temp_array.append((matrix[3][5][1] + y_offset))
+    map_1_cords.append(temp_array)
+
+    temp_array = [] #map1 field 7
+
+    temp_array.append((matrix[3][6][0] + x_offset))
+    temp_array.append((matrix[3][6][1] + y_offset))
+    temp_array.append((matrix[4][5][0] + x_offset))
+    temp_array.append((matrix[4][5][1] + y_offset))
+    map_1_cords.append(temp_array)
+
+    temp_array = [] #map1 field 8
+
+    temp_array.append((matrix[4][6][0] + x_offset))
+    temp_array.append((matrix[4][6][1] + y_offset))
+    temp_array.append((matrix[5][5][0] + x_offset))
+    temp_array.append((matrix[5][5][1] + y_offset))
+    map_1_cords.append(temp_array)
+
+    temp_array = [] #map1 field 9
+
+    temp_array.append((matrix[5][6][0] + x_offset))
+    temp_array.append((matrix[5][6][1] + y_offset))
+    temp_array.append((matrix[6][5][0] + x_offset))
+    temp_array.append((matrix[6][5][1] + y_offset))
+    map_1_cords.append(temp_array)
+
+    temp_array = [] #map1 field 10
+
+    temp_array.append((matrix[5][5][0] + x_offset))
+    temp_array.append((matrix[5][5][1] + y_offset))
+    temp_array.append((matrix[6][4][0] + x_offset))
+    temp_array.append((matrix[6][4][1] + y_offset))
+    map_1_cords.append(temp_array)
+
+    temp_array = [] #map1 field 11
+
+    temp_array.append((matrix[5][3][0] + x_offset))
+    temp_array.append((matrix[5][3][1] + y_offset))
+    temp_array.append((matrix[6][4][0] + x_offset))
+    temp_array.append((matrix[6][4][1] + y_offset))
+    map_1_cords.append(temp_array)
+
+    temp_array = [] #map1 field 12
+
+    temp_array.append((matrix[5][2][0] + x_offset))
+    temp_array.append((matrix[5][2][1] + y_offset))
+    temp_array.append((matrix[6][3][0] + x_offset))
+    temp_array.append((matrix[6][3][1] + y_offset))
+    map_1_cords.append(temp_array)
+
+    temp_array = [] #map1 field 13
+
+    temp_array.append((matrix[5][1][0] + x_offset))
+    temp_array.append((matrix[5][1][1] + y_offset))
+    temp_array.append((matrix[6][2][0] + x_offset))
+    temp_array.append((matrix[6][2][1] + y_offset))
+    map_1_cords.append(temp_array)
+
+    temp_array = [] #map1 field 14
+
+    temp_array.append((matrix[4][1][0] + x_offset))
+    temp_array.append((matrix[4][1][1] + y_offset))
+    temp_array.append((matrix[5][2][0] + x_offset))
+    temp_array.append((matrix[5][2][1] + y_offset))
+    map_1_cords.append(temp_array)
+
+    temp_array = [] #map1 field 15
+
+    temp_array.append((matrix[3][1][0] + x_offset))
+    temp_array.append((matrix[3][1][1] + y_offset))
+    temp_array.append((matrix[4][2][0] + x_offset))
+    temp_array.append((matrix[4][2][1] + y_offset))
+    map_1_cords.append(temp_array)
+
+    temp_array = [] #map1 field 16
+
+    temp_array.append((matrix[2][1][0] + x_offset))
+    temp_array.append((matrix[2][1][1] + y_offset))
+    temp_array.append((matrix[3][2][0] + x_offset))
+    temp_array.append((matrix[3][2][1] + y_offset))
+    map_1_cords.append(temp_array)
+
+    temp_array = [] #map2 field 1
+
+    temp_array.append((matrix[2][2][0] + x_offset))
+    temp_array.append((matrix[2][2][1] + y_offset))
+    temp_array.append((matrix[3][3][0] + x_offset))
+    temp_array.append((matrix[3][3][1] + y_offset))
+    map_2_cords.append(temp_array)
+
+    temp_array = [] #map2 field 2
+
+    temp_array.append((matrix[2][3][0] + x_offset))
+    temp_array.append((matrix[2][3][1] + y_offset))
+    temp_array.append((matrix[3][4][0] + x_offset))
+    temp_array.append((matrix[3][4][1] + y_offset))
+    map_2_cords.append(temp_array)
+
+    temp_array = [] #map2 field 3
+
+    temp_array.append((matrix[2][5][0] + x_offset))
+    temp_array.append((matrix[2][5][1] + y_offset))
+    temp_array.append((matrix[3][4][0] + x_offset))
+    temp_array.append((matrix[3][4][1] + y_offset))
+    map_2_cords.append(temp_array)
+
+    temp_array = [] #map2 field 4
+
+    temp_array.append((matrix[3][5][0] + x_offset))
+    temp_array.append((matrix[3][5][1] + y_offset))
+    temp_array.append((matrix[4][4][0] + x_offset))
+    temp_array.append((matrix[4][4][1] + y_offset))
+    map_2_cords.append(temp_array)
+
+    temp_array = [] #map2 field 5
+
+    temp_array.append((matrix[4][5][0] + x_offset))
+    temp_array.append((matrix[4][5][1] + y_offset))
+    temp_array.append((matrix[5][4][0] + x_offset))
+    temp_array.append((matrix[5][4][1] + y_offset))
+    map_2_cords.append(temp_array)
+
+    temp_array = [] #map2 field 6
+
+    temp_array.append((matrix[4][3][0] + x_offset))
+    temp_array.append((matrix[4][3][1] + y_offset))
+    temp_array.append((matrix[5][4][0] + x_offset))
+    temp_array.append((matrix[5][4][1] + y_offset))
+    map_2_cords.append(temp_array)
+
+    temp_array = [] #map2 field 7
+
+    temp_array.append((matrix[4][2][0] + x_offset))
+    temp_array.append((matrix[4][2][1] + y_offset))
+    temp_array.append((matrix[5][3][0] + x_offset))
+    temp_array.append((matrix[5][3][1] + y_offset))
+    map_2_cords.append(temp_array)
+
+    temp_array = [] #map2 field 8
+
+    temp_array.append((matrix[3][2][0] + x_offset))
+    temp_array.append((matrix[3][2][1] + y_offset))
+    temp_array.append((matrix[4][3][0] + x_offset))
+    temp_array.append((matrix[4][3][1] + y_offset))
+    map_2_cords.append(temp_array)
+
+    temp_array = [] #map3 field 1
+
+    temp_array.append((matrix[3][3][0] + x_offset))
+    temp_array.append((matrix[3][3][1] + y_offset))
+    temp_array.append((matrix[4][4][0] + x_offset))
+    temp_array.append((matrix[4][4][1] + y_offset))
+    map_3_cords.append(temp_array)
+
+
+    # for i in range(len(matrix)-1):
+    #     print(matrix[i])
+    #     for j in range(len(matrix[i])-1):
+    #         print(str(i*(len(matrix)-1) + j))
+    #         print ("[" + str(matrix[i][j][0]+x_offset) + " " + str(matrix[i][j][1]+y_offset)  + "]" + " [" + str(matrix[i+1][j+1][0]+x_offset) + " " + str(matrix[i+1][j+1][1]+y_offset) + "]")
+    #
 
 def get_basic_map_points (x,y):
 
@@ -614,10 +1063,10 @@ def get_basic_map_points (x,y):
     for i in range (8):
         x_cor.append(round((x*i)/7))
         y_cor.append(round((y*i)/7))
-    print (x)
-    print (y)
-    print (x_cor)
-    print (y_cor)
+    #print (x)
+    #print (y)
+    #print (x_cor)
+    #print (y_cor)
 
     return x_cor, y_cor
 
@@ -681,7 +1130,7 @@ def read_process_memory(process_id, address, offsets, size_of_data=8):
 #
 #     #print (current_player)
 
-def get_turn_current_player (base_adress, p_pid):
+def get_turn_current_player (base_adress, p_pid, player_char):
 
     #7FDF70 -> offset for currently selected player
     base_adress_2 = base_adress+ int('7FDF70', 16)
@@ -703,7 +1152,11 @@ def get_turn_current_player (base_adress, p_pid):
             war = False
         temp_offset += 1
 
-    return current_player
+    if current_player.__contains__(player_char):
+        return 1
+    else:
+        return 0
+    #return current_player
 
 def check_in_memory_for_user_data_and_get_true_base_memory (fourLetters, p_pid):
 
@@ -733,6 +1186,7 @@ def check_in_memory_for_user_data_and_get_true_base_memory (fourLetters, p_pid):
 #print(true_base_memory)
 #
 #print(get_turn_current_player(true_base_memory, 18256))
-#main()
+main()
 
-looking(3,0)
+#looking(3,0)
+#looking(2,1)
