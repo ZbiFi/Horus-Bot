@@ -51,7 +51,10 @@ map_width = 7
 # board height
 map_height = 7
 
-game_pid = 13180
+x_scale = 1
+y_scale = 1
+
+game_pid = 15024
 steam_name_4_lett = "Kamo"
 true_base_memory = 0
 player_character = 'Roboute Guilliman'
@@ -82,6 +85,7 @@ def main ():
     pid = win32gui.FindWindow(None, 'Talisman : The Horus Heresy')
     true_base_memory = check_in_memory_for_user_data_and_get_true_base_memory(steam_name_4_lett, game_pid)
     #print(true_base_memory)
+
     looking(3, 0)  # loadCORDS for given resolution
 
     while True:
@@ -117,7 +121,7 @@ def main ():
             #load player stats
             if players_stats_map_status == 0:
                 players_stats_map_status = load_player_stats(players_stats_map_status)
-                #print(players_stats_map)
+                print(players_stats_map)
 
             #check_if_roll_needed
             #if (if_waiting_for_roll()):
@@ -153,8 +157,11 @@ def background_screenshot(hwnd, width, height):
 
 def click_on_not_found_location (pid):
 
-    x = 946
-    y = 140
+    print(x_scale)
+    print(y_scale)
+
+    x = round(946*x_scale)
+    y = round(140*y_scale)
     win32api.SetCursorPos((x, y))
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
@@ -352,6 +359,8 @@ def check_if_in_area(x,y,mode2):
 
 def looking(mode, mode2):
 
+    global x_scale
+    global y_scale
     #mode: 1 - signle search 2 - all higher then threshold
     #mode2: 0 - normal 1 -top
     #img_rgb = cv2.imread('ssmanipulations/screenshot.bmp')
@@ -423,10 +432,10 @@ def looking(mode, mode2):
             #cv2.rectangle(img_rgb, (MPx, MPy), (MPx + tcols, MPy + trows), (0, 0, 255), 2)
 
         # Display the original image with the rectangle around the match.
-        cv2.imshow('output', img_rgb)
+        #cv2.imshow('output', img_rgb)
 
         # The image is only displayed if we call this
-        cv2.waitKey(0)
+        #cv2.waitKey(0)
         return 1, None, None, None
 
     if mode == 2:
@@ -471,8 +480,8 @@ def looking(mode, mode2):
         #print(place)
         if place == "":
             return 0, "", -1, -1
-        cv2.imshow('output', img_rgb)
-        cv2.waitKey(10)
+        #cv2.imshow('output', img_rgb)
+        #cv2.waitKey(10)
         #print (place)
         #print (location)
         #print(map_number)
@@ -570,8 +579,8 @@ def looking(mode, mode2):
                 stop_loop = 1
         #if place == "":
         #    return 0
-        cv2.imshow('output', img_rgb)
-        cv2.waitKey(10)
+        #cv2.imshow('output', img_rgb)
+        #cv2.waitKey(10)
         return 1, None, None, None
 
 
@@ -1158,6 +1167,77 @@ def get_turn_current_player (base_adress, p_pid, player_char):
         return 0
     #return current_player
 
+
+def get_data_from_memory_for_dices (adress,p_pid):
+
+    PROCESS_ALL_ACCESS = 0x1F0FFF
+    processHandle = win32api.OpenProcess(PROCESS_ALL_ACCESS, False, p_pid)
+    modules = win32process.EnumProcessModules(processHandle)
+    processHandle.close()
+
+    for module in modules:
+        adress2 = int(adress, 16)
+        result = (read_process_memory(p_pid, adress2, 0, False))
+        result2 = result.to_bytes(4, 'little')
+        #print(result2)
+        try:
+            check = result2.decode("utf-8")
+        except UnicodeDecodeError:
+            continue
+
+        return check
+
+def get_current_primary_dice_value_all_players_one (p_pid):
+
+    # 1170767D -> memory address#1 for primary dice (one) (movement) from dx -> igd9dxva32.dll + 160 ' 1A 00
+    # 117076C9 -> memory address#2 for primary dice (one) (movement) from dx -> igd9dxva32.dll + 160 ' 24 00
+
+    # 1489767D alt
+    # 148976C9 alt
+
+    result = get_data_from_memory_for_dices ("1489767D", p_pid)
+
+    return (result)
+
+
+def get_current_primary_dice_value_all_players_two(p_pid):
+    #
+    #
+
+    # 1489827D alt
+    # 148982C9 alt
+
+    result = get_data_from_memory_for_dices("1489827D   ", p_pid)
+
+    return (result)
+
+def get_current_battle_dice_value_player_one (p_pid):
+
+
+    # 116C607D -> memory address#1 for battle dice (only 1)
+    # 116C60C9 -> memory address#2 for battle dice(only 1)
+
+    # 1485607D
+    # 148560C9
+
+    result = get_data_from_memory_for_dices("116C607D", p_pid)
+
+    return (result)
+
+def get_current_battle_dice_value_enemy_one (p_pid):
+
+
+    # 1485027D -> memory address#1 for battle dice (only 1)
+    # 1485027D -> memory address#2 for battle dice(only 1)
+
+    #
+    #
+
+    result = get_data_from_memory_for_dices("116C02C9", p_pid)
+
+    return (result)
+
+
 def check_in_memory_for_user_data_and_get_true_base_memory (fourLetters, p_pid):
 
     PROCESS_ALL_ACCESS = 0x1F0FFF
@@ -1178,6 +1258,7 @@ def check_in_memory_for_user_data_and_get_true_base_memory (fourLetters, p_pid):
             continue
 
         if check == fourLetters:
+            print (module)
             return module
 
 
@@ -1186,7 +1267,11 @@ def check_in_memory_for_user_data_and_get_true_base_memory (fourLetters, p_pid):
 #print(true_base_memory)
 #
 #print(get_turn_current_player(true_base_memory, 18256))
-main()
-
+#main()
+#check_in_memory_for_user_data_and_get_true_base_memory("Kamo",17336)
+print(get_current_primary_dice_value_all_players_one(5816))
+print(get_current_primary_dice_value_all_players_two(5816))
+print(get_current_battle_dice_value_player_one(5816))
+print(get_current_battle_dice_value_enemy_one(5816))
 #looking(3,0)
 #looking(2,1)
